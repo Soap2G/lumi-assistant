@@ -1,6 +1,6 @@
 ---
 name: cern-docs
-description: Use when the user asks how a CERN service or ATLAS framework operates and the answer should come from canonical operator documentation — HTCondor / lxbatch submission, SWAN session settings and HTCondor pool, CERN Cloud (OpenStack) flavors and quotas, ML@CERN training and serving, ATLAS Athena / ASG / Tier-0 / databases, ATLAS computing and grid production. Backed by the `cerndocs` MCP (`search_docs` for BM25 search, `fetch_doc` for one page) over 7 indexed sources: atlas-sft, atlas-computing, atlas-databases, batch, cloud, ml, swan. Does NOT cover Open Data dataset / recid / DOI lookup (use `cern-opendata` or `atlas-opendata`), live job-state inspection (use `reana` or shell tools), or multi-service infra recommendations (use `infra-advisor`). Disambiguator phrase: CERN MkDocs full-text search.
+description: Use when the user asks how a CERN service or ATLAS / FTS framework operates and the answer should come from canonical operator documentation — HTCondor / lxbatch submission, SWAN session settings and HTCondor pool, CERN Cloud (OpenStack) flavors and quotas, ML@CERN training and serving, ATLAS Athena / ASG / Tier-0 / databases, ATLAS computing and grid production, FTS3 (File Transfer Service) configuration / installation / REST API / messaging / monitoring. Backed by the `cerndocs` MCP (`search_docs` for BM25 search, `fetch_doc` for one page) over 8 indexed sources: atlas-sft, atlas-computing, atlas-databases, batch, cloud, ml, swan, fts. Does NOT cover the `fts-rest-*` CLI itself (use `fts-rest`), Open Data dataset / recid / DOI lookup (use `cern-opendata` or `atlas-opendata`), live job-state inspection (use `reana` or shell tools), or multi-service infra recommendations (use `infra-advisor`). Disambiguator phrase: CERN docs BM25 multi-source.
 data_scope: both
 ---
 
@@ -9,23 +9,30 @@ data_scope: both
 Upstream MCP: https://cern-mkdocs-mcp.app.cern.ch/mcp
 
 This skill is a thin wrapper around the `cerndocs` MCP server. The
-server indexes the search payloads of seven MkDocs-based CERN sites
-(BM25 cached for 24 h) and pulls page bodies live from the upstream
-git repos on demand.
+server indexes eight CERN docs sites (BM25 cached for 24 h) and pulls
+page bodies live from the upstream git repos on demand. Two site
+shapes are covered transparently: **MkDocs** (search payload at
+`/search/search_index.json`) and legacy **GitBook v2/CLI** (no search
+payload — the server walks `SUMMARY.md` and indexes every linked
+markdown page).
 
 ## When to load this skill
 
-The user wants to know how a CERN service or ATLAS framework operates
-**as documented**. Examples:
+The user wants to know how a CERN service or ATLAS / FTS framework
+operates **as documented**. Examples:
 
 - "How do I submit an HTCondor job from lxplus?"
 - "What does the SWAN session timeout default to?"
 - "Where are the GPU flavors documented in CERN Cloud?"
 - "How does ATLAS Athena versioning work?"
 - "What endpoints does ml.cern.ch's serving expose?"
+- "How is the FTS3 server configured?"
+- "What does the FTS3 docs say about OAuth2 token support / S3 / multihop?"
 
 Do NOT load this skill for:
 
+- **Driving the FTS REST CLI** (`fts-rest-transfer-submit`, `fts-rest-whoami`,
+  …) → use `fts-rest`.
 - **Open Data dataset / recid lookup** → use `cern-opendata`
   (portal records) or `atlas-opendata` (DSIDs, MC metadata).
 - **Live job-state inspection** (a *running* REANA workflow, a
@@ -36,23 +43,24 @@ Do NOT load this skill for:
 ## Source IDs
 
 The MCP exposes one `source` parameter to route queries to one of
-seven indexed sites. Pick the source that matches the user's domain;
+eight indexed sites. Pick the source that matches the user's domain;
 when ambiguous, search more than one — each source is its own BM25
 index and a wrong-source query can miss a hit silently.
 
-| `source` | Site | Topic | `fetch_doc`? |
-|---|---|---|---|
-| `atlas-sft` | atlas-software.docs.cern.ch | Athena, ASG, ATLAS software | ✅ |
-| `atlas-computing` | atlas-computing.docs.cern.ch | Tier-0, grid, MC production | ✅ |
-| `atlas-databases` | atlas-databases.docs.cern.ch | COOL, AMI, conditions DBs | ✅ |
-| `batch` | batchdocs.web.cern.ch | HTCondor / lxbatch | ❌ snippets only |
-| `cloud` | clouddocs.web.cern.ch | OpenStack, CERN Cloud, GPUs | ❌ snippets only |
-| `ml` | ml.docs.cern.ch | ML@CERN, Kubeflow, serving | ❌ snippets only |
-| `swan` | swan.docs.cern.ch | SWAN Jupyter sessions | ❌ snippets only |
+| `source` | Site | Topic | Backend | `fetch_doc`? |
+|---|---|---|---|---|
+| `atlas-sft` | atlas-software.docs.cern.ch | Athena, ASG, ATLAS software | MkDocs | ✅ |
+| `atlas-computing` | atlas-computing.docs.cern.ch | Tier-0, grid, MC production | MkDocs (gated) | ✅ |
+| `atlas-databases` | atlas-databases.docs.cern.ch | COOL, AMI, conditions DBs | MkDocs (gated) | ✅ |
+| `batch` | batchdocs.web.cern.ch | HTCondor / lxbatch | MkDocs | ❌ snippets only |
+| `cloud` | clouddocs.web.cern.ch | OpenStack, CERN Cloud, GPUs | MkDocs | ❌ snippets only |
+| `ml` | ml.docs.cern.ch | ML@CERN, Kubeflow, serving | MkDocs | ❌ snippets only |
+| `swan` | swan.docs.cern.ch | SWAN Jupyter sessions | MkDocs | ❌ snippets only |
+| `fts` | fts3-docs.web.cern.ch/fts3-docs | FTS3 install / config / REST API / monitoring / messaging | GitBook | ✅ |
 
 The MCP also exposes a `docs://sources` resource that lists the
 registered sources at request time — call it if you suspect the source
-list has grown beyond the seven above.
+list has grown beyond the eight above.
 
 ## Tool usage
 
@@ -63,11 +71,11 @@ list has grown beyond the seven above.
 
 ### Step 2 — source-class dependent
 
-The seven sources split into two classes based on how their content is hosted:
+The eight sources split into two classes based on how their content is hosted:
 
-**Class A — Markdown-backed (`atlas-sft`, `atlas-computing`, `atlas-databases`)**
-These are MkDocs sites with a `docs/` directory accessible via the GitLab Files
-API. `fetch_doc` can retrieve full page bodies:
+**Class A — Markdown-backed (`atlas-sft`, `atlas-computing`, `atlas-databases`, `fts`)**
+The MCP can resolve a search hit's URL back to a `.md` source file in the
+upstream repo and fetch it. `fetch_doc` returns full page bodies:
 
 - `fetch_doc(url, mode="outline")` — headings only. Confirm the right page first.
 - `fetch_doc(url, mode="sections:<heading>")` — one section; use when the
@@ -75,8 +83,12 @@ API. `fetch_doc` can retrieve full page bodies:
 - `fetch_doc(url, mode="markdown")` — full page body. Most expensive; use only
   when the question genuinely needs the whole page.
 
+For `fts`, the resolver follows GitBook conventions: `…/docs/overview.html`
+resolves to `docs/overview.md`; directory URLs and `…/index.html` resolve
+to the matching `README.md`.
+
 **Class B — search-only (`batch`, `cloud`, `ml`, `swan`)**
-These sources are hosted outside the MkDocs GitLab path resolver. `fetch_doc`
+These sources are hosted outside the GitLab path resolver. `fetch_doc`
 returns "No matching source file" for all URLs from these sources.
 
 - Use `search_docs` with a higher limit (`limit=20`) to cast a wider net.
@@ -88,7 +100,9 @@ returns "No matching source file" for all URLs from these sources.
 ## Output rules — what makes it into the user reply
 
 - Cite the **public docs URL** that the search hit returned (e.g.
-  `https://swan.docs.cern.ch/sessions/`). The user can open it.
+  `https://swan.docs.cern.ch/sessions/` or
+  `https://fts3-docs.web.cern.ch/fts3-docs/docs/overview.html`). The
+  user can open it.
 - Quote the relevant prose from the fetched body inline; do not link
   the user to the MCP URL or to any internal page identifier.
 - If the MCP returns a Recovery Guide (auth-gated source with no
@@ -102,6 +116,12 @@ returns "No matching source file" for all URLs from these sources.
 2. Pick the top hit, `fetch_doc(url=<hit URL>, mode="outline")` to confirm.
 3. `fetch_doc(url=<hit URL>, mode="markdown")` for the full body.
 4. Quote the relevant section, cite the URL.
+
+**"How do I configure FTS3 for OAuth2 tokens?"** (fts — Class A, GitBook)
+1. `search_docs(query="OAuth2 token configuration", source="fts")`
+2. `fetch_doc(url=<hit URL>, mode="outline")` to scout the page.
+3. `fetch_doc(url=<hit URL>, mode="sections:Configuration")` for the relevant section.
+4. Quote the section, cite the rendered `.html` URL.
 
 **"How do I submit a condor job from lxplus?"** (batch — Class B, search-only)
 1. `search_docs(query="submit job from lxplus", source="batch", limit=20)`
@@ -117,3 +137,15 @@ returns "No matching source file" for all URLs from these sources.
 **Cross-source question** ("compare HTCondor on batch vs SWAN's HTCondor pool"):
 run `search_docs` separately against `batch` and `swan`, present both.
 Don't let the BM25 ranker silently hide one source.
+
+## Limitation: FTS REST CLI docs
+
+The FTS3 docs index covers the markdown under
+`gitlab.cern.ch/fts/documentation/docs/`. The build pipeline of the
+upstream site *also* pulls REST CLI / Python-bindings docs from a
+separate repo (`cern-fts/fts-rest`) into `fts-rest/docs/` at publish
+time — those pages are **not in this MCP's index** (cross-repo
+inclusion isn't followed). For REST CLI command syntax, prefer the
+`fts-rest` skill (which has the command catalogue and `--help`
+output), or fall back to the upstream rendered URL the user can open
+in a browser.

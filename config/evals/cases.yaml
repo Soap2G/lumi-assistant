@@ -89,6 +89,16 @@ should_match:
       - "Show me where the GPU flavors are documented in CERN Cloud."
       - "Find me the ATLAS Athena release naming docs on atlas-software."
       - "What endpoints does ml.cern.ch's serving expose, per the ML@CERN docs?"
+      - "What do the FTS3 docs say about OAuth2 token support and configuration?"
+      - "Find the FTS3 third-party-copy / S3 / multihop docs at fts3-docs.web.cern.ch."
+
+  - skill: fts-rest
+    prompts:
+      - "Submit a transfer with fts-rest-transfer-submit from an SRM URL to an EOS HTTPS URL."
+      - "What's the status of FTS job 4d2c0f8a-... on the pilot endpoint? Use fts-rest-transfer-status."
+      - "List my recent FAILED FTS jobs on fts3-atlas.cern.ch:8446."
+      - "Cancel an FTS3 transfer job by id with fts-rest-transfer-cancel."
+      - "How do I delegate my proxy to the FTS server with fts-rest-delegate?"
 
   - agent: tutor
     prompts:
@@ -164,3 +174,6 @@ should_not_match:
   # hepdata cliff guards (vague data requests; route to atlas-opendata or pdg-lookup):
   - "Find me Higgs data."
   - "Get me the cross-section for ttbar from PDG."
+  # fts-rest vs rucio cliff guards (Rucio-driven replication ≠ direct fts-rest):
+  - "Add a Rucio replication rule that will trigger an FTS transfer."
+  - "Use rucio rule add to enqueue cross-site copies via FTS3."
