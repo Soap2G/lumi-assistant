@@ -59,8 +59,10 @@ The contribution flow for an upstream-mergeable skill:
 3. Add 3–5 prompts to `config/evals/cases.yaml` that should select it,
    plus 2 that should not.
 4. Run `python config/evals/lint.py` from the repo root.
-5. Open a PR. CI runs lint on every PR and the full skill-router eval
-   on push to `main`.
+5. Run `python config/evals/run.py` locally (manual — not in CI) to
+   confirm the router still picks the right skill for the prompts in
+   `cases.yaml`. Needs `ANTHROPIC_API_KEY`.
+6. Open a PR. CI runs the structural lint on every PR.
 
 If you maintain a CERN service and want to onboard your skill
 backlog, see the [Validation](#validation) section for the local dev
@@ -260,9 +262,12 @@ pip install pyyaml httpx
 python config/evals/run.py
 ```
 
-This runs in CI on push to `main`, on manual workflow dispatch, and on
-PRs from the same repository (forks skip it because the secret isn't
-exposed).
+This is a **manual** check — it's not wired into CI (the harness
+spends API tokens against the configured Anthropic model). Run it
+locally when you add, rename, or restructure a skill description, or
+any time you suspect the router has regressed. See
+[`config/evals/README.md`](config/evals/README.md) for the failure-mode
+guidance (Principle 8 of the design guide).
 
 ## Citation
 

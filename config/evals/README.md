@@ -20,6 +20,11 @@ failures with the prompt and the wrong choice the model made.
 
 ## Running it
 
+The harness is **not wired into CI** — it's a manual / on-demand
+check. Run it locally whenever you add, rename, or restructure a
+skill's `description` (Principle 7 step 8), and any time you suspect
+the router has regressed.
+
 ```bash
 # From the repo root:
 export ANTHROPIC_API_KEY=sk-ant-...
@@ -33,8 +38,8 @@ Override the model with `EVAL_MODEL` (any Anthropic model id):
 EVAL_MODEL=claude-sonnet-4-6 python config/evals/run.py
 ```
 
-Exit code is `0` if all cases pass, `1` if any fail. Wire it into
-`pre-commit` or CI to catch regressions on every description change.
+Exit code is `0` if all cases pass, `1` if any fail — so it slots
+cleanly into a local `pre-commit` hook if you want one.
 
 ## When you add or rename a skill
 
