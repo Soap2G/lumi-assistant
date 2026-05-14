@@ -1,4 +1,4 @@
-# open-data-assistant-config
+# lumi-assistant
 
 [![checks](https://github.com/Soap2G/lumi-assistant/actions/workflows/checks.yml/badge.svg)](https://github.com/Soap2G/lumi-assistant/actions/workflows/checks.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -6,8 +6,7 @@
 
 A pluggable [opencode](https://opencode.ai) configuration that turns
 opencode (or its CERN-flavoured sibling **Lumi**) into a **general
-CERN assistant** — open data, service operations (Rucio, REANA, EOS,
-CRIC, SWAN, lxbatch, …), physics analysis, detector
+CERN assistant** — open data, service operations (Rucio, FTS, REANA, EOS, SWAN, lxbatch, …), physics analysis, detector
 and MC reference, and anything else CERN-shaped that someone bothers
 to write a skill for.
 
