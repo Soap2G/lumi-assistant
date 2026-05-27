@@ -186,13 +186,13 @@ and write access to the target CVMFS repository):
 What happens:
 
 1. `cvmfs_server transaction sw.escape.eu`
-2. `rsync -a --delete dist/cvmfs-stage/ /cvmfs/sw.escape.eu/open-data-assistant/`
+2. `rsync -a --delete dist/cvmfs-stage/ /cvmfs/sw.escape.eu/etc/lumi/atom-assistant/`
 3. `cvmfs_server publish sw.escape.eu`
 
 Users on any lxplus / SWAN / workstation with the CVMFS mount then do:
 
 ```bash
-source /cvmfs/sw.escape.eu/open-data-assistant/latest/bin/setup.sh
+source /cvmfs/sw.escape.eu/etc/lumi/atom-assistant/latest/bin/setup.sh
 lumi    # or opencode
 ```
 
@@ -228,8 +228,7 @@ They coexist: the Lumi binary is perfectly capable of loading this
 repo's config. Once both are on CVMFS:
 
 ```bash
-source /cvmfs/sw.escape.eu/lumi/latest/bin/setup.sh               # get the `lumi` binary
-source /cvmfs/sw.escape.eu/open-data-assistant/latest/bin/setup.sh # point it at this config
+source /cvmfs/sw.escape.eu/lumi/latest/bin/setup.sh               # get the `lumi` binary which already point to its own config
 lumi
 ```
 
