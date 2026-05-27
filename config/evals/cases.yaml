@@ -139,6 +139,30 @@ should_match:
       - "Plot the invariant mass from my Open Data file."
       - "Write me an analysis script for the ttbar sample."
 
+  - skill: vector
+    prompts:
+      - "Compute the invariant mass of two muons from their pT, eta, phi arrays with the vector library."
+      - "How do I boost a 4-vector into its rest frame using Scikit-HEP vector?"
+      - "Calculate ΔR between two jets using awkward arrays and the vector library."
+
+  - skill: fastjet
+    prompts:
+      - "Cluster anti-kt R=0.4 jets from particle-flow constituents in Python with fastjet."
+      - "How do I run Cambridge/Aachen jet clustering on truth particles?"
+      - "Recluster large-R jet constituents using the fastjet Python bindings."
+
+  - skill: pylhe
+    prompts:
+      - "Read the per-event weights out of an LHE file in Python."
+      - "Parse a Les Houches Event file and list the final-state particles with pylhe."
+      - "How do I access the run metadata block of an LHE file?"
+
+  - skill: pyhepmc
+    prompts:
+      - "Read a HepMC3 file and walk the particle production vertices in Python."
+      - "Write generator-level events to HepMC3 format with pyhepmc."
+      - "Inspect the event graph of a HepMC record."
+
 # Prompts that should NOT pull any skill or agent. Used to test the
 # router's "NONE" path. The harness expects the router to abstain.
 #

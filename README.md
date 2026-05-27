@@ -91,7 +91,8 @@ open-data-assistant-config/
 │   └── skills/
 │       ├── learn/                 ← atlas-notebooks, sm-analyses
 │       ├── discover/              ← atlas-opendata, cern-opendata
-│       ├── access/                ← physlite-basics, rucio
+│       ├── access/                ← physlite-basics, rucio, pylhe, pyhepmc
+│       ├── analyze/               ← vector, fastjet (vendored from usatlas)
 │       ├── compute/               ← reana, reana-workflows
 │       ├── reference/             ← cern-docs (cerndocs MCP)
 │       ├── operational/           ← verification-before-completion (vendored)

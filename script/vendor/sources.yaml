@@ -19,12 +19,15 @@ sources:
 
   usatlas:
     repo: https://github.com/usatlas/marketplace
-    sha: PIN_AT_EXECUTION
-    date: DATE_AT_EXECUTION
+    sha: 21d3823d3df778e70607cdbfef2554790b2b2418
+    date: 2026-05-27
     path: plugins/{plugin}/skills/{skill}/SKILL.md
 
 vendored:
   - source: superpowers
     skill: verification-before-completion
     bucket: operational
-  # usatlas skills are appended in v1.13.0
+  - { source: usatlas, plugin: atlas, skill: vector,   bucket: analyze }
+  - { source: usatlas, plugin: atlas, skill: fastjet,  bucket: analyze }
+  - { source: usatlas, plugin: atlas, skill: pylhe,    bucket: access }
+  - { source: usatlas, plugin: atlas, skill: pyhepmc,  bucket: access }

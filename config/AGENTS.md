@@ -61,7 +61,10 @@ tool. The categories present today are:
   `sm-analyses`).
 - `discover/` — finding datasets and records (`atlas-opendata`,
   `cern-opendata`).
-- `access/` — getting bytes local (`physlite-basics`, `rucio`).
+- `access/` — getting bytes local (`physlite-basics`, `rucio`,
+  `pylhe`, `pyhepmc`).
+- `analyze/` — computing on data already in memory (`vector`,
+  `fastjet`).
 - `compute/` — running jobs and workflows (`reana`, `reana-workflows`).
 - `reference/` — canonical doc lookup (`cern-docs`, backed by the
   cerndocs MCP).
