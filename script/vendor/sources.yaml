@@ -1,0 +1,30 @@
+# Upstream skill repositories that lumi vendors from.
+#
+# Each `vendored:` entry pairs an upstream skill body (fetched at the
+# pinned SHA) with a lumi-authored frontmatter override at
+# script/vendor/<skill>.frontmatter.md. The override carries the
+# routing-relevant fields (description, data_scope, experiment) so they
+# stay under lumi's control for cliff prevention; the body flows from
+# upstream unchanged.
+#
+# To bump a pin: edit sha + date below, re-run sync_vendored.py,
+# review the diff, commit.
+
+sources:
+  superpowers:
+    repo: https://github.com/obra/superpowers
+    sha: e7a2d16476bf042e9add4699c9d018a90f86e4a6
+    date: 2026-04-28
+    path: skills/{skill}/SKILL.md
+
+  usatlas:
+    repo: https://github.com/usatlas/marketplace
+    sha: PIN_AT_EXECUTION
+    date: DATE_AT_EXECUTION
+    path: plugins/{plugin}/skills/{skill}/SKILL.md
+
+vendored:
+  - source: superpowers
+    skill: verification-before-completion
+    bucket: operational
+  # usatlas skills are appended in v1.13.0

@@ -102,8 +102,8 @@ open-data-assistant-config/
 │   └── setup.sh                   ← sourced by users (any prefix)
 ├── script/
 │   ├── cvmfs-deploy.sh            ← stage and optionally publish
-│   ├── sync-superpowers.sh        ← rebuild vendored skills from upstream
-│   └── superpowers/               ← lock + per-skill frontmatter overrides
+│   ├── sync_vendored.py           ← rebuild vendored skills from upstream
+│   └── vendor/                    ← sources.yaml + per-skill frontmatter overrides
 ├── .github/workflows/checks.yml   ← lint on every PR + evals on main
 ├── VERSION                        ← semver string; drives the staged directory name
 ├── LICENSE                        ← MIT
@@ -114,23 +114,27 @@ open-data-assistant-config/
 
 ### Vendored skills
 
-Some skills under `config/skills/operational/` are vendored from
-upstream repos (e.g. obra/superpowers) at a pinned commit. Vendoring
-beats submodules for this case because we always rewrite each skill's
-`description:` to anchor it to the CERN domain — generic descriptions
+Skills under `config/skills/` can be vendored from upstream skill
+repositories at a pinned commit. Vendoring beats submodules because
+we always rewrite each skill's `description:`, `data_scope:`, and
+`experiment:` to anchor it to the CERN domain — generic descriptions
 out-shout our domain skills in the router (the *confusability cliff*
 the design guide warns about).
 
-The pattern: `script/superpowers/<skill>.frontmatter.md` holds our
-override for one skill, and `script/sync-superpowers.sh` combines
-that with the upstream body at the SHA pinned in `script/superpowers/lock`.
-Run `./script/sync-superpowers.sh --check` to detect drift from the
-pin; bump `sha=` and `date=` in the lock and re-run without `--check`
-to update.
+The pipeline is in `script/sync_vendored.py`, driven by
+`script/vendor/sources.yaml`. Each upstream source is declared with a
+`repo`, `sha`, `date`, and a `path` template. Each vendored skill is
+paired with a lumi frontmatter override at
+`script/vendor/<skill>.frontmatter.md`.
 
-The upstream body changes flow through automatically; the routing-
-relevant fields (`description`, `data_scope`, `name`) stay under our
-control.
+```bash
+python script/sync_vendored.py           # rebuild all vendored skills
+python script/sync_vendored.py --check   # dry-run; exit 2 if drift
+```
+
+To bump a pin: edit `sha` + `date` in `sources.yaml`, re-run without
+`--check`, review the diff, commit. The upstream body flows through
+unchanged; the routing-relevant fields stay under lumi's control.
 
 ## Local dev
 
