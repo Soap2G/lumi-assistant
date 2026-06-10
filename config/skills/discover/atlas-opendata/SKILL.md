@@ -1,6 +1,6 @@
 ---
 name: atlas-opendata
-description: Use when the user has an ATLAS DSID, `physics_short` name, or ATLAS Open Data release tag (`2024r-pp`, `2025r-evgen-13tev`) and needs file URLs, cross-sections, k-factors, filter efficiencies, sumOfWeights, or MC weight metadata. Backed by the `atlasopenmagic` MCP. Operates on ATLAS Open Data only — for collaboration-internal datasets use `rucio`; for non-ATLAS portal records identified by `recid` or DOI use `cern-opendata`. Disambiguator phrase: atlasopenmagic DSID resolver.
+description: Use when the user has an ATLAS DSID, `physics_short` name, or ATLAS Open Data release tag (`2024r-pp`, `2025r-evgen-13tev`) and needs file URLs, cross-sections, k-factors, filter efficiencies, sumOfWeights, or MC weight metadata. Backed by the `atlasopenmagic` MCP. Operates on ATLAS Open Data only — for collaboration-internal datasets use `rucio`; for non-ATLAS portal records identified by `recid` or DOI use `cern-opendata`; for configuring or running the Sherpa generator itself (steering files, process setup) use `sherpa-manual` — this skill only resolves metadata for already-produced samples, including Sherpa-produced (`Sh_…`) ones. Disambiguator phrase: atlasopenmagic DSID resolver.
 data_scope: open
 experiment: atlas
 ---

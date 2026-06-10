@@ -94,7 +94,7 @@ open-data-assistant-config/
 │       ├── access/                ← physlite-basics, rucio, pylhe, pyhepmc, fts-rest
 │       ├── analyze/               ← vector, fastjet (vendored from usatlas)
 │       ├── compute/               ← reana, reana-workflows, htcondor
-│       ├── reference/             ← cern-docs (cerndocs MCP), pdg-lookup
+│       ├── reference/             ← cern-docs (cerndocs MCP), pdg-lookup, sherpa-manual (Sherpa v3.0.1 / LCG_107)
 │       ├── operational/           ← verification-before-completion (vendored)
 │       └── infra-advisor/         ← cross-category routing
 ├── docs/

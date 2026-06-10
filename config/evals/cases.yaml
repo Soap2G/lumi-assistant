@@ -42,6 +42,9 @@ should_match:
       - "Get me the file URLs for ttbar samples in the 2024r-pp release."
       - "What's the kFactor and filter efficiency for physics_short Wjets?"
       - "Switch to the 2025r-evgen-13tev release and list its datasets."
+      # Sample metadata for a Sherpa-produced (Sh_...) sample is atlas-opendata,
+      # NOT sherpa-manual — the word "Sherpa" must not pull the config skill:
+      - "What's the cross-section and sum-of-weights for the ATLAS Open Data sample Sh_2211_Zee_maxHTpTV2_BFilter?"
 
   - skill: cern-opendata
     prompts:
@@ -95,6 +98,9 @@ should_match:
       - "Which CERN services should I stitch for a reproducible Higgs analysis?"
       - "How should I scale my notebook to a few hundred core-hours at CERN?"
       - "Where do I run a GPU training job at CERN — SWAN, ml.cern.ch, or OpenStack?"
+      # Getting a binary on PATH / sourcing an LCG view is environment routing,
+      # NOT sherpa-manual config (lcg-stacks.md lives under infra-advisor):
+      - "Sherpa: command not found on lxplus — which LCG view do I need to source to get it on my PATH?"
 
   - skill: verification-before-completion
     prompts:
@@ -187,6 +193,16 @@ should_match:
       - "Read a HepMC3 file and walk the particle production vertices in Python."
       - "Write generator-level events to HepMC3 format with pyhepmc."
       - "Inspect the event graph of a HepMC record."
+      # Reading Sherpa's HepMC3 *output* is pyhepmc, not sherpa-manual config:
+      - "How do I read the HepMC3 event file that Sherpa produced, in Python?"
+
+  - skill: sherpa-manual
+    prompts:
+      - "Write me a Sherpa.yaml steering file to generate Z->ee with up to 4 jets using MEPS@NLO merging."
+      - "What's the PROCESSES block syntax in Sherpa v3 for pp -> t tbar? Which PDG codes and Order do I use?"
+      - "Which Sherpa command-line option sets the number of events, and which sets the run directory?"
+      - "How do I enable hard decays with branching-ratio reweighting in Sherpa's YAML config?"
+      - "I have a Sherpa v2 Run.dat with a (run){...}(end) block — how do I port it to the v3 YAML steering format?"
 
 # Prompts that should NOT pull any skill or agent. Used to test the
 # router's "NONE" path. The harness expects the router to abstain.
@@ -221,3 +237,5 @@ should_not_match:
   - "Walk me through the LHCb DaVinci stripping selections for my decay analysis."
   # htcondor cliff guard (SLURM ≠ HTCondor — no in-library answer for SLURM):
   - "How do I submit an MPI job to CERN's Linux HPC SLURM cluster?"
+  # sherpa-manual cliff guard (other generator — no Pythia skill yet, abstain):
+  - "How do I configure a Pythia8 hadronization tune?"

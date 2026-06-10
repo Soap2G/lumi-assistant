@@ -24,6 +24,15 @@ that read PHYSLITE and reduced ntuples.
   authenticated dataset / replica / rule queries and the `reana` skill
   for workflow lifecycle and log inspection. Never assume these tools
   are installed without checking first.
+- **LCG views (CVMFS).** Many physics tools (event generators, ROOT, analysis
+  libraries) are provided by LCG software stacks on CVMFS, not installed
+  per-user. Put them on PATH by sourcing a view:
+  `source /cvmfs/sft.cern.ch/lcg/views/<STACK>/<PLATFORM>/setup.sh`. The
+  **current pinned stack, platform, and the tool→version mapping** live in one
+  place — `config/skills/infra-advisor/reference/lcg-stacks.md` — so a stack
+  bump is a one-file edit. Detect a specific tool with `command -v <tool>`
+  before assuming it is installed; if absent, the user needs to source the
+  view. Never hard-code an `LCG_<NNN>` path into a tool skill.
 - Python is the primary language. Prefer `uproot`, `awkward`, `coffea`,
   `mplhep`, `hist`, `pyhf`. PyROOT is fine when the user is clearly
   using ROOT.
@@ -68,7 +77,8 @@ tool. The categories present today are:
   `fastjet`).
 - `compute/` — running jobs and workflows (`reana`, `reana-workflows`,
   `htcondor`).
-- `reference/` — canonical doc lookup (`cern-docs`, `pdg-lookup`).
+- `reference/` — canonical doc lookup (`cern-docs`, `pdg-lookup`,
+  `sherpa-manual`).
 - `operational/` — meta-skills about how the assistant works
   (`verification-before-completion`, vendored from obra/superpowers).
 - `infra-advisor` (top-level) — meta-skill that routes ACROSS
@@ -306,6 +316,17 @@ experiment axis.
   `pdg-lookup` and quote the value with the PDG record URL and edition year.
   Never quote particle constants from training-data memory; this is a
   critical rule 5 trap.
+- When the user wants to configure, set up, or debug a run of the **Sherpa**
+  Monte Carlo event generator — the `Sherpa.yaml` YAML steering file, the
+  `PROCESSES` block, ME generators (Comix/Amegic), showers, MEPS@NLO / MC@NLO
+  matching/merging, or the `Sherpa` command-line options — load the
+  `sherpa-manual` skill (pinned to the v3.0.1 manual, the version in LCG_107).
+  Sherpa v3 uses YAML steering, NOT the legacy v2 `Run.dat` syntax. Detect the
+  binary with `command -v Sherpa`; for getting it on PATH, defer to the LCG
+  environment (above), not the skill. This is generator *configuration*; for
+  metadata of an already-produced Sherpa sample (`Sh_…` physics_short,
+  cross-section, DSID) use `atlas-opendata`, and for reading Sherpa's HepMC3/LHE
+  output use `pyhepmc` / `pylhe`.
 - When the user wants the published numerical tables (not just the
   headline value) attached to an HEP measurement — for re-fitting,
   plotting, or systematics studies — load `hepdata`. Common downstream
