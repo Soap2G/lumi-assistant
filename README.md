@@ -90,11 +90,11 @@ open-data-assistant-config/
 │   │   └── README.md
 │   └── skills/
 │       ├── learn/                 ← atlas-notebooks, sm-analyses
-│       ├── discover/              ← atlas-opendata, cern-opendata
-│       ├── access/                ← physlite-basics, rucio, pylhe, pyhepmc
+│       ├── discover/              ← atlas-opendata, cern-opendata, hepdata, read-publication
+│       ├── access/                ← physlite-basics, rucio, pylhe, pyhepmc, fts-rest
 │       ├── analyze/               ← vector, fastjet (vendored from usatlas)
 │       ├── compute/               ← reana, reana-workflows, htcondor
-│       ├── reference/             ← cern-docs (cerndocs MCP)
+│       ├── reference/             ← cern-docs (cerndocs MCP), pdg-lookup
 │       ├── operational/           ← verification-before-completion (vendored)
 │       └── infra-advisor/         ← cross-category routing
 ├── docs/
@@ -240,7 +240,7 @@ lumi
 The order matters only if both export conflicting variables — the
 last `source` wins. `setup.sh` here sets `OPENCODE_CONFIG_DIR`, which
 is loaded *after* the Lumi `OPENCODE_CONFIG` file by opencode's config
-loader ([config.ts:1317-1352](https://github.com/opencode-ai/opencode/blob/dev/packages/opencode/src/config/config.ts)),
+loader ([config.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/config/config.ts)),
 so this config wins on overlap.
 
 ## Validation
@@ -282,7 +282,7 @@ in `CITATION.cff` should be replaced.
 
 ## License
 
-[MIT](LICENSE) — same as [opencode](https://github.com/sst/opencode),
+[MIT](LICENSE) — same as [opencode](https://github.com/anomalyco/opencode),
 [archi](https://github.com/archi-physics/archi), and the broader HEP
 analysis-tools ecosystem.
 

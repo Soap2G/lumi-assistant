@@ -64,7 +64,7 @@ The `atlasopenmagic` MCP server provides these tools (prefixed with `atlasopenma
 
 ### Datasets
 
-Each Monte Carlo sample is identified by a numeric **dataset number** (DSID), e.g. `301204`, and a human-readable **physics_short** name, e.g. `Sh_2211_Zee_maxHTpTV2_BFilter`.
+Each Monte Carlo sample is identified by a numeric **dataset number** (DSID, e.g. `301204`) and a human-readable **physics_short** name (e.g. `Sh_2211_Zee_maxHTpTV2_BFilter` — a *different* sample; the two examples are independent, not a DSID↔name pairing). Always resolve a real pairing with `atlas_get_metadata`; never assume one from these illustrative examples.
 
 ### Physics Short Name Convention
 

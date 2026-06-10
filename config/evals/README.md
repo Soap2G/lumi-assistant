@@ -44,9 +44,15 @@ cleanly into a local `pre-commit` hook if you want one.
 ## When you add or rename a skill
 
 Per **Principle 7 step 7** of the design guide, every new skill ships
-with **3–5 prompts that should select it** plus 2 that should not.
-Add them to `cases.yaml` under `should_match` (or `should_not_match`)
-in the same PR that adds the skill. Then run the harness — if it
+with **3–5 prompts that should select it**, plus cliff guards.
+
+Mind the contract: `should_not_match` means the router must **abstain**
+(`run.py` passes a prompt there only if the answer is literally `NONE`).
+Reserve it for prompts with no correct in-library answer (off-topic, or
+scope/experiment-mismatched). A negative guard whose correct destination
+is *another* skill belongs under **that** skill's `should_match` — top-1
+equality already asserts "not anyone else", so it doubles as the guard.
+Add them in the same PR that adds the skill. Then run the harness — if it
 regresses on a *pre-existing* skill, the new description overlaps too
 much. Revise before merging.
 

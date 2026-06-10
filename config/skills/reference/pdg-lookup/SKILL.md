@@ -55,14 +55,17 @@ question:
 
 | Surface | URL pattern | Use for |
 |---|---|---|
-| pdgLive listing pages (HTML) | `https://pdg.lbl.gov/2024/listings/rpp2024-list-<particle>.pdf` | Full review entries with averages and inputs |
-| pdgLive summary tables (HTML) | `https://pdg.lbl.gov/2024/tables/rpp2024-sum-<group>.pdf` | Quick cross-particle comparisons |
+| pdgLive HTML (preferred) | `https://pdglive.lbl.gov/` | Interactive listings — WebFetch-friendly HTML; the cheapest reliable surface when it carries the value |
+| pdgLive listing pages (PDF) | `https://pdg.lbl.gov/2024/listings/rpp2024-list-<particle>.pdf` | Full review entries with averages and inputs |
+| pdgLive summary tables (PDF) | `https://pdg.lbl.gov/2024/tables/rpp2024-sum-<group>.pdf` | Quick cross-particle comparisons |
 | PDG Booklet PDF | `https://pdg.lbl.gov/2024/booklet/rpp2024-booklet.pdf` | Bulk reading offline |
 | PDG REST API (where available) | `https://pdgapi.lbl.gov/...` | Programmatic single-value lookup |
 
-The REST API is evolving and not all values are exposed yet. If a value is
-missing from the API, fall through to the relevant listing PDF and extract
-via the v1.6.0 PDF guideline (`pdftotext` over the listing).
+**Prefer the HTML surfaces** (pdgLive, REST API) — they are WebFetch-friendly
+and avoid the fragile PDF-extraction path. The `rpp2024-list-*` / `rpp2024-sum-*`
+links are **PDFs** (note the `.pdf`): fall back to them, plus the v1.6.0 PDF
+guideline (`pdftotext` over the listing), only when pdgLive and the REST API
+lack the value. The REST API is evolving and not all values are exposed yet.
 
 ## Common particle URL cheatsheet
 

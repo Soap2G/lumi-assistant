@@ -39,11 +39,12 @@ that read PHYSLITE and reduced ntuples.
     Records are identified by `recid`, DOI, or exact title. Use this
     for portal records: CMS primary datasets, LHCb/ALICE records,
     analysis examples, container environments, supplementary files.
-  - **cerndocs** — full-text search and live page-fetch across seven
-    MkDocs-based CERN sites: ATLAS software/Athena (`atlas-sft`),
-    ATLAS computing (`atlas-computing`), ATLAS databases
-    (`atlas-databases`), HTCondor batch (`batch`), CERN Cloud
-    (`cloud`), ML@CERN (`ml`), SWAN Jupyter (`swan`). Use
+  - **cerndocs** — full-text search and live page-fetch across eight
+    CERN docs sources, two site shapes: seven **MkDocs** sites — ATLAS
+    software/Athena (`atlas-sft`), ATLAS computing (`atlas-computing`),
+    ATLAS databases (`atlas-databases`), HTCondor batch (`batch`), CERN
+    Cloud (`cloud`), ML@CERN (`ml`), SWAN Jupyter (`swan`) — plus one
+    legacy **GitBook** site, FTS3 / File Transfer Service (`fts`). Use
     `search_docs` first (BM25, token-cheap), then `fetch_doc` with
     `mode="outline"` or `mode="markdown"` to read a page.
   - Routing: prefer **atlasopenmagic** for DSID / `physics_short` /
@@ -60,14 +61,14 @@ tool. The categories present today are:
 - `learn/` — didactic notebook routing (`atlas-notebooks`,
   `sm-analyses`).
 - `discover/` — finding datasets and records (`atlas-opendata`,
-  `cern-opendata`).
+  `cern-opendata`, `hepdata`, `read-publication`).
 - `access/` — getting bytes local (`physlite-basics`, `rucio`,
-  `pylhe`, `pyhepmc`).
+  `pylhe`, `pyhepmc`, `fts-rest`).
 - `analyze/` — computing on data already in memory (`vector`,
   `fastjet`).
-- `compute/` — running jobs and workflows (`reana`, `reana-workflows`).
-- `reference/` — canonical doc lookup (`cern-docs`, backed by the
-  cerndocs MCP).
+- `compute/` — running jobs and workflows (`reana`, `reana-workflows`,
+  `htcondor`).
+- `reference/` — canonical doc lookup (`cern-docs`, `pdg-lookup`).
 - `operational/` — meta-skills about how the assistant works
   (`verification-before-completion`, vendored from obra/superpowers).
 - `infra-advisor` (top-level) — meta-skill that routes ACROSS
@@ -76,10 +77,10 @@ tool. The categories present today are:
 Skills are resolved by their `name:` frontmatter, not by path, so the
 folder hierarchy is for human navigation — moving a skill between
 intent buckets does not break router resolution. The architectural
-spec for adding, renaming, or splitting skills lives outside this
-repo at *Skill Library Design Guide — CERN Assistant*; consult its
-**Principle 7 growth checklist** before merging any new skill or
-MCP tool.
+spec for adding, renaming, or splitting skills is the in-repo
+authoritative copy at `docs/skill-design.md` (*Skill Library Design
+Guide — CERN Assistant*); consult its **Principle 7 growth checklist**
+before merging any new skill or MCP tool.
 
 ## Critical rules — never violate
 
@@ -254,9 +255,10 @@ experiment axis.
   flags, HTCondor / lxbatch submission, OpenStack flavors, ML@CERN
   endpoints, Athena / ASG release internals — load the `cern-docs`
   skill and route via the `cerndocs` MCP. Always start with
-  `search_docs` (token-cheap). For `atlas-sft`, `atlas-computing`, and
-  `atlas-databases` you can follow up with `fetch_doc` to retrieve page
-  bodies (progressive: `outline` → `sections:<heading>` → `markdown`).
+  `search_docs` (token-cheap). For `atlas-sft`, `atlas-computing`,
+  `atlas-databases`, and `fts` you can follow up with `fetch_doc` to
+  retrieve page bodies (progressive: `outline` → `sections:<heading>` →
+  `markdown`).
   For `batch`, `cloud`, `ml`, and `swan`, `fetch_doc` is unavailable —
   use `search_docs` with `limit=20` and extract from snippets. Cite the
   public docs URL the search returns, not the MCP-internal identifier.
