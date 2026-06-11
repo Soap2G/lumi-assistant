@@ -80,7 +80,9 @@ tool. The categories present today are:
 - `reference/` — canonical doc lookup (`cern-docs`, `pdg-lookup`,
   `sherpa-manual`).
 - `operational/` — meta-skills about how the assistant works
-  (`verification-before-completion`, vendored from obra/superpowers).
+  (`verification-before-completion`, vendored from obra/superpowers;
+  `analysis-review`, the standalone multi-reviewer panel protocol; and
+  `plot-validator`, the programmatic figure red-flag checks it calls).
 - `infra-advisor` (top-level) — meta-skill that routes ACROSS
   categories.
 
@@ -169,8 +171,11 @@ field declaring which data world it targets:
   infrastructure router, a verification gate).
 
 Personas declare which scopes they accept via `accepts_data_scope`
-in their frontmatter. Today both `tutor` and `analysis` accept
-`[open, both]` — they are the Open Data audience. Future personas
+in their frontmatter. The `tutor` and `analysis` personas accept
+`[open, both]` — they are the Open Data audience. The review-panel
+agents (`reviewer-physics`, `reviewer-critical`, `reviewer-constructive`,
+`arbiter`) accept `[open, internal, both]`: the panel referees an
+artifact regardless of which data world produced it. Future personas
 (an ATLAS-internal analysis helper, a CMS framework helper, a
 service-engineer persona) will accept `[internal, both]` or some
 mix.
@@ -208,8 +213,11 @@ field declaring which LHC experiment it serves:
   Scikit-HEP tooling, PDG, HEPData, CERN service documentation).
 
 Personas declare which experiments they serve via `accepts_experiment`.
-Today both `tutor` and `analysis` accept `[atlas, all]` — they are the
-ATLAS Open Data audience.
+The `tutor` and `analysis` personas accept `[atlas, all]` — they are the
+ATLAS Open Data audience. The review-panel agents (`reviewer-physics`,
+`reviewer-critical`, `reviewer-constructive`, `arbiter`) accept
+`[atlas, cms, lhcb, alice, all]` so the panel can referee any
+experiment's artifact.
 
 **Routing contract**: when a persona declares `accepts_experiment`, only
 consider skills whose `experiment` is in that set. If the user query
@@ -281,6 +289,23 @@ experiment axis.
   show concrete evidence (status, exit code, file size, cutflow row
   counts). "Should have worked" is not evidence; running the proof
   command and reading its output is.
+- When the user wants an analysis ARTIFACT critiqued — a notebook, an
+  analysis-note PDF/text, or an analysis repo with a `COMMITMENTS.md` —
+  and expects a verdict on whether it is sound, load the `analysis-review`
+  skill. It is the panel *protocol*: it spawns the `reviewer-physics`
+  (blinded), `reviewer-critical` (tool-grounded), and
+  `reviewer-constructive` subagents, runs `plot-validator` on any figure,
+  and hands the A/B/C findings to the `arbiter` for one
+  PASS / ITERATE / ESCALATE verdict. This reviews analysis *content* — it
+  is distinct from `verification-before-completion`, which gates a
+  "the compute job finished" claim.
+- When only a single FIGURE needs checking (a histogram PNG/PDF or its
+  histogram/fit JSON), load `plot-validator` and run its
+  `scripts/plot_checks.py` — it catches missing/blank files, out-of-band
+  data/MC ratios, empty/negative bins, zero-dof fits (`chi2/ndf = 0/0`),
+  and the MeV/GeV axis trap, with thresholds read from its
+  `reference/thresholds.md`. Always also view the rendered image (PDF →
+  text via the recipe below). Its red flags are not downgradable.
 - Before generating analysis code (coffea processor, uproot iterate
   loop, ROOT macro, REANA workflow definition, plotting script), surface
   assumptions you would otherwise pick silently: audience scope (open

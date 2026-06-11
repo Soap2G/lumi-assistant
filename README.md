@@ -82,7 +82,11 @@ open-data-assistant-config/
 │   ├── AGENTS.md                  ← top-level persona + critical rules
 │   ├── agents/
 │   │   ├── tutor.md               ← didactic, read-only
-│   │   └── analysis.md            ← hands-on analysis
+│   │   ├── analysis.md            ← hands-on analysis
+│   │   ├── reviewer-physics.md    ← blinded physics referee (review panel)
+│   │   ├── reviewer-critical.md   ← tool-grounded critical reviewer
+│   │   ├── reviewer-constructive.md ← constructive improver
+│   │   └── arbiter.md             ← PASS / ITERATE / ESCALATE verdict
 │   ├── evals/
 │   │   ├── cases.yaml             ← prompt × expected-skill ground truth
 │   │   ├── run.py                 ← skill-router eval harness (needs API key)
@@ -95,7 +99,7 @@ open-data-assistant-config/
 │       ├── analyze/               ← vector, fastjet (vendored from usatlas)
 │       ├── compute/               ← reana, reana-workflows, htcondor
 │       ├── reference/             ← cern-docs (cerndocs MCP), pdg-lookup, sherpa-manual (Sherpa v3.0.1 / LCG_107)
-│       ├── operational/           ← verification-before-completion (vendored)
+│       ├── operational/           ← verification-before-completion (vendored), analysis-review, plot-validator
 │       └── infra-advisor/         ← cross-category routing
 ├── docs/
 │   └── skill-design.md            ← Skill Library Design Guide (vendor target)

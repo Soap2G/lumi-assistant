@@ -204,6 +204,53 @@ should_match:
       - "How do I enable hard decays with branching-ratio reweighting in Sherpa's YAML config?"
       - "I have a Sherpa v2 Run.dat with a (run){...}(end) block — how do I port it to the v3 YAML steering format?"
 
+  - skill: analysis-review
+    prompts:
+      - "Run a multi-reviewer panel over my HZZ notebook and give me a single PASS / ITERATE / ESCALATE verdict."
+      - "I want a physics, critical, and constructive review of my analysis note plus a COMMITMENTS.md audit."
+      - "Convene the review panel on my analysis repo and adjudicate all the findings into one verdict."
+      - "Critique this whole analysis for correctness, plot validity, and unmet commitments, then decide if it passes."
+      # Cliff guard vs verification-before-completion: this is content review with
+      # fresh reviewers each round, NOT a "did the compute job finish" evidence gate.
+      - "Set up the iterative review → fix → re-review loop with a fresh reviewer each round for my analysis."
+
+  - skill: plot-validator
+    prompts:
+      - "Run the programmatic red-flag checks on my dimuon mass histogram PDF before anyone reviews it."
+      - "Check my data/MC ratio plot for out-of-band bins and a zero-degree-of-freedom fit."
+      - "Validate this figure: does the fit have positive degrees of freedom and are the bins sane?"
+      - "Run plot_checks.py on my histogram JSON with the cross_section profile."
+      # Cliff guard vs analysis-review: one figure, mechanical checks only, not the panel.
+      - "I just have one figure — run the mechanical checks on it, not the whole review panel."
+
+  - agent: reviewer-physics
+    prompts:
+      - "Give me a blinded physics-referee read of this notebook — artifact only, no methodology, no tool lookups."
+      - "Act as an external reviewer who sees only the plot and the question and judges the physics."
+      - "Referee this analysis-note text blind: don't fetch the right answer, reason from what's in front of you."
+      - "I want an isolated, read-only physics critique with no MCP or web access."
+
+  - agent: reviewer-critical
+    prompts:
+      - "Critically review this analysis and ground every number in a live MCP lookup or a re-run computation."
+      - "Critically review whether my notebook's MC weight is right: re-derive it by pulling the cross-section and sum-of-weights live and comparing against what the code used."
+      - "Review with full context and re-check the fit's degrees of freedom and the cross-section by running Python."
+      - "Tool-grounded critique: recompute the yields and confirm the DSID metadata rather than trusting the text."
+
+  - agent: reviewer-constructive
+    prompts:
+      - "Suggest improvements to make this sound analysis stronger — extra systematics, cross-checks, finer binning."
+      - "What would make this analysis more defensible? Give me actionable upgrades, not blocking defects."
+      - "Give me constructive suggestions to polish my figures and add a robustness check."
+      - "Recommend high-leverage additions to strengthen my analysis without hunting for errors."
+
+  - agent: arbiter
+    prompts:
+      - "Take these reviewer findings and the plot-validator report and return one PASS / ITERATE / ESCALATE verdict."
+      - "Adjudicate the panel's A/B/C findings and audit the COMMITMENTS.md [x]/[D]/[ ] ledger."
+      - "Collect the reviewers' findings and decide the verdict — don't downgrade any plot-validator red flag."
+      - "Given the findings and a COMMITMENTS.md, judge whether downscopes outnumber resolutions and escalate if so."
+
 # Prompts that should NOT pull any skill or agent. Used to test the
 # router's "NONE" path. The harness expects the router to abstain.
 #
