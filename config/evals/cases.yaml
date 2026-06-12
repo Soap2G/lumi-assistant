@@ -203,6 +203,7 @@ should_match:
       - "Which Sherpa command-line option sets the number of events, and which sets the run directory?"
       - "How do I enable hard decays with branching-ratio reweighting in Sherpa's YAML config?"
       - "I have a Sherpa v2 Run.dat with a (run){...}(end) block — how do I port it to the v3 YAML steering format?"
+      - "I ran Sherpa and the only output is a Results.zip with no event file — what is Results.zip and why are there no events?"
 
   - skill: analysis-review
     prompts:
