@@ -1,6 +1,6 @@
 ---
 name: sherpa-manual
-description: Use when the user wants to configure, set up, debug, or understand a run of the Sherpa Monte Carlo event generator (v3.0.1, the version in the current CERN LCG stack) — writing or fixing the `Sherpa.yaml` YAML steering file, defining the `PROCESSES` block with PDG codes and particle containers, choosing matrix-element generators (Comix / Amegic), parton showers, multijet merging (MEPS@NLO / CKKW) or NLO matching (MC@NLO), beams / PDFs / scale variations / selectors, hadronization, hard decays, or the `Sherpa` command-line options (`-e`, `-p`, `-a`, `-R`, …). Answers come from the canonical Sherpa v3.0.1 manual (a Sphinx site) via WebFetch; the page map is baked in. CRITICAL: Sherpa v3 uses YAML steering (`Sherpa.yaml`) — NOT the legacy v2 `Run.dat` `(run){…}(end)` syntax, and v2 steering files are not reusable. Does NOT cover ATLAS Open Data Sherpa-produced sample metadata — DSIDs, `physics_short` names like `Sh_2211_Zee_…`, cross-sections, k-factors, sumOfWeights (use `atlas-opendata`); reading Sherpa's HepMC3 output event records (use `pyhepmc`) or Les Houches Event files (use `pylhe`); how to get the Sherpa binary on PATH / which LCG view to source (that is environment setup, not config); other generators Pythia / Herwig / MadGraph / Powheg (not yet covered); or CERN service / batch / grid documentation (use `cern-docs`). Disambiguator phrase: Sherpa.yaml steering configuration.
+description: Use when the user wants to configure, set up, debug, or understand a run of the Sherpa Monte Carlo event generator (v3.0.1, the version in the current CERN LCG stack) — writing or fixing the `Sherpa.yaml` YAML steering file, defining the `PROCESSES` block with PDG codes and particle containers, choosing matrix-element generators (Comix / Amegic), parton showers, multijet merging (MEPS@NLO / CKKW) or NLO matching (MC@NLO), beams / PDFs / scale variations / selectors, hadronization, hard decays, the `Sherpa` command-line options (`-e`, `-p`, `-a`, `-R`, …), or interpreting a run's output artifacts — what `Results.zip` / the cached integration grid is, and why a run wrote no events. Answers come from the canonical Sherpa v3.0.1 manual (a Sphinx site) via WebFetch; the page map is baked in. CRITICAL: Sherpa v3 uses YAML steering (`Sherpa.yaml`) — NOT the legacy v2 `Run.dat` `(run){…}(end)` syntax, and v2 steering files are not reusable. Does NOT cover ATLAS Open Data Sherpa-produced sample metadata — DSIDs, `physics_short` names like `Sh_2211_Zee_…`, cross-sections, k-factors, sumOfWeights (use `atlas-opendata`); reading Sherpa's HepMC3 output event records (use `pyhepmc`) or Les Houches Event files (use `pylhe`); how to get the Sherpa binary on PATH / which LCG view to source (that is environment setup, not config); other generators Pythia / Herwig / MadGraph / Powheg (not yet covered); or CERN service / batch / grid documentation (use `cern-docs`). Disambiguator phrase: Sherpa.yaml steering configuration.
 data_scope: both
 experiment: all
 ---
@@ -33,6 +33,7 @@ The user wants to **configure or understand Sherpa itself**:
 - "What does `CKKW` / the merging scale do in the process block?"
 - "I have a Sherpa v2 `Run.dat` — port it to v3 YAML."
 - "How do I pick the PDF set / scale variations / a phase-space selector?"
+- "My Sherpa run only produced a `Results.zip` and no events — what is it / why?"
 
 Do NOT load this skill for:
 
@@ -224,8 +225,72 @@ Higher-level pages: `getting-started` (install + first run), `input-structure`
 (external PDFs/RNG/one-loop ME, Python interface, user hooks). The complete
 36-page index is in `reference/page-map.md`.
 
+## Sherpa run artifacts — what the files in a run directory are
+
+The manual has **no single "output files" page**, so this is the consolidated
+picture (grounded in the integration / AMEGIC++ discussion in `getting-started`
+and the event-output section in `general-parameters`, plus operational Sherpa
+behaviour). After a `Sherpa` run you typically see:
+
+| Artifact | What it is | Events? |
+|---|---|---|
+| `Results.zip` (or `Results/`) | **Cached integration results** — the optimized phase-space integration grids and computed cross-sections, packed so later runs skip the (often expensive) integration step. Controlled by `-r` / `--result-directory` (default base name `Results`). | **No** — this is the integration grid; the #1 misread. |
+| `Process/` | Per-process information, written on **initialization of any run** (Comix *and* Amegic). With **Amegic** it *additionally* holds generated C++ matrix-element source that must be compiled once via `makelibs` (see below). | No |
+| `makelibs` | Script written by the Amegic init run; run `./makelibs` (needs cmake) to compile, then re-run Sherpa. | No |
+| `*.hepmc` / `*.lhe` / `*.root` | The actual events — **only if you asked for them** (see below). | **Yes** |
+| `*.yoda` | Rivet / analysis histograms, only if `-a` / `ANALYSIS` is enabled (`-A` sets the dir). | No (derived) |
+| log file | Run log, if `-l` / `--log-file` is set. | No |
+
+### Events are NOT written by default
+
+The manual is explicit: *"The generated events are not stored into a file by
+default."* Sherpa integrates, optimizes the phase space, and generates events
+**in memory** unless an output format is configured. To write events, set
+`EVENT_OUTPUT` with a file base name:
+
+```yaml
+EVENT_OUTPUT: HepMC3[MyFile]      # -> MyFile.hepmc  (HepMC3, ASCII GenEvent)
+# multiple formats at once:
+# EVENT_OUTPUT:
+#   - HepMC3[MyFile]
+#   - Root[MyFile]
+```
+
+(The HepMC3 sub-format is set by `HEPMC3_IO_TYPE`: 0 = ASCII GenEvent (default),
+1 = HepEvt, 2 = HepMC2 ASCII, 3/4 = ROOT.)
+
+**Diagnostic:** a run directory that has `Results.zip` and a `Process/` dir but
+no `*.hepmc` / `*.lhe` / `*.root` did **not** write events — it integrated
+(and possibly generated in memory), but `EVENT_OUTPUT` was unset. Establish this
+before telling a user "here are your events." `Results.zip` is never the events.
+
+### The Amegic compile step (two-run sequence)
+
+`Process/` is created on initialization for **any** generator. What is specific
+to **Amegic** (`-m Amegic`) is that it *also* writes the matrix elements as C++
+**source** into `Process/`, and the first (initialization) run stops with
+**"New libraries created. Please compile."** Run the auto-generated `./makelibs`
+(cmake required) to compile them, then run Sherpa again to integrate and
+generate. With **Comix** (the default) there is no source to compile and no such
+stop — Sherpa integrates and generates in one run.
+
+### Reusing / resetting integration
+
+`Results.zip` exists so you do not re-integrate every time — re-running to make
+more events (or fanning out across batch nodes) reuses it. Delete it, or point
+`-r` elsewhere, to force a clean re-integration; it is also invalidated when the
+process or beam settings change. This caching is operational Sherpa behaviour
+(not a single documented page) and was confirmed correct by the Sherpa team.
+
+Sources: https://sherpa-team.gitlab.io/sherpa/v3.0.1/manual/getting-started.html
+· https://sherpa-team.gitlab.io/sherpa/v3.0.1/manual/parameters/general-parameters.html
+
 ## Honesty rules (specific to this skill)
 
+- **`Results.zip` is not events** — it is the cached integration grid (see
+  *Sherpa run artifacts*). A run dir with only `Results.zip` and no
+  `*.hepmc` / `*.lhe` / `*.root` wrote no events; say so rather than presenting
+  the integration cache as event output.
 - **Never emit v2 `Run.dat` `(run){…}(end)` syntax.** If unsure whether a knob
   is spelled the same in v3, fetch the relevant page and confirm.
 - **Do not invent parameter names, defaults, or values.** Sherpa has hundreds of
@@ -257,5 +322,8 @@ the manual URL changes (e.g. v3.0.1 → v3.0.5 or v3.1.x):
 3. Re-snapshot the inventory:
    `curl -s …/<new>/objects.inv` → decompress (zlib after the 4-line header) →
    regenerate the page list and command-line-option table.
-4. Re-confirm the steering format on `manual/input-structure.html`.
+4. Re-confirm the steering format on `manual/input-structure.html`, and
+   re-verify the curated **Sherpa run artifacts** facts (events not written
+   without `EVENT_OUTPUT`; `Results.zip` = integration cache; Amegic
+   `Process/` + `makelibs`) — they are not pinned to one fetchable page.
 5. Bump `VERSION` (patch) and re-run the eval harness.
