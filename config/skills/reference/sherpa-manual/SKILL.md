@@ -56,16 +56,28 @@ Do NOT load this skill for:
 ## Availability — the Sherpa binary
 
 This skill answers documentation/config questions without needing the binary.
-When the user wants to actually *run* a setup, check:
+When the user wants to actually *run* a setup, **probe it functionally** — source
+the view and ask Sherpa for its version, in one command (`command -v Sherpa` only
+proves it is on PATH, not that it runs):
 
 ```bash
-command -v Sherpa        # is the executable on PATH?
+source /cvmfs/sft.cern.ch/lcg/views/<STACK>/<PLATFORM>/setup.sh && Sherpa --version
 ```
 
-If absent, the user has not set up their software environment. At CERN, Sherpa
-is provided by an **LCG view** on CVMFS — the user sources the view, then
-re-checks. The exact stack and platform are **intentionally not hard-coded
-here** (they bump independently of the manual): the single source of truth is
+A printed `Sherpa version …` banner means it is runnable. If instead you get
+`error while loading shared libraries: libSherpa*.so`, the view did not put
+Sherpa's lib dir on `LD_LIBRARY_PATH` — this is a known runtime quirk, not an
+absent install. Fix it (then re-probe):
+
+```bash
+export LD_LIBRARY_PATH="$(Sherpa-config --prefix)/lib64/SHERPA-MC:$LD_LIBRARY_PATH"
+```
+
+If `command -v Sherpa` finds nothing at all, the user has not set up their
+software environment. At CERN, Sherpa is provided by an **LCG view** on CVMFS —
+the user sources the view, then re-probes. The exact stack and platform are
+**intentionally not hard-coded here** (they bump independently of the manual):
+the single source of truth — including the runtime-quirk fix above — is
 `config/skills/infra-advisor/reference/lcg-stacks.md`, and the mechanism is in
 AGENTS.md "## Environment". Do **not** paste a `LCG_<NNN>` path into this skill.
 

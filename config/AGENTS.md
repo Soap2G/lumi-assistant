@@ -28,11 +28,17 @@ that read PHYSLITE and reduced ntuples.
   libraries) are provided by LCG software stacks on CVMFS, not installed
   per-user. Put them on PATH by sourcing a view:
   `source /cvmfs/sft.cern.ch/lcg/views/<STACK>/<PLATFORM>/setup.sh`. The
-  **current pinned stack, platform, and the tool→version mapping** live in one
-  place — `config/skills/infra-advisor/reference/lcg-stacks.md` — so a stack
-  bump is a one-file edit. Detect a specific tool with `command -v <tool>`
-  before assuming it is installed; if absent, the user needs to source the
-  view. Never hard-code an `LCG_<NNN>` path into a tool skill.
+  **current pinned stack, platform, the tool→version mapping, and per-tool
+  runtime quirks** live in one place —
+  `config/skills/infra-advisor/reference/lcg-stacks.md` — so a stack bump is a
+  one-file edit. To check a tool, **probe it functionally** —
+  `source …/setup.sh && <tool> --version` in a *single* command — not just
+  `command -v <tool>`: a binary can be on PATH yet fail at runtime with missing
+  shared libraries (e.g. Sherpa needs `lib64/SHERPA-MC/` added to
+  `LD_LIBRARY_PATH`; see the reference's **Runtime quirks** table). Shell state
+  does not persist between Bash calls, so source-and-run must be chained in one
+  command. If the tool is genuinely absent, the user needs to source the view.
+  Never hard-code an `LCG_<NNN>` path into a tool skill.
 - Python is the primary language. Prefer `uproot`, `awkward`, `coffea`,
   `mplhep`, `hist`, `pyhf`. PyROOT is fine when the user is clearly
   using ROOT.

@@ -2,9 +2,9 @@
 
 This file is the ONE place to bump when the CERN LCG software stack changes.
 Tool skills (`sherpa-manual`, and future LCG-provided tools) deliberately carry
-NO stack version — they detect the binary with `command -v <tool>` and defer
-here for setup. AGENTS.md "## Environment" describes the mechanism generically
-and points at this file for the current values.
+NO stack version — they probe the binary (see **Detecting a tool** below) and
+defer here for setup. AGENTS.md "## Environment" describes the mechanism
+generically and points at this file for the current values.
 
 ## Mechanism
 
@@ -23,6 +23,44 @@ source /cvmfs/sft.cern.ch/lcg/views/<STACK>/<PLATFORM>/setup.sh
 Requires the CVMFS mount `/cvmfs/sft.cern.ch` (present on lxplus, SWAN, many
 CERN nodes; mountable elsewhere via cvmfs). Detect the mount with
 `ls /cvmfs/sft.cern.ch` before assuming a view can be sourced.
+
+> **Shell state does not persist between commands.** Each Bash tool call runs in
+> a fresh shell, so a `source …/setup.sh` in one call is gone by the next. Always
+> **source the view and run the tool in a single chained command**:
+> ```bash
+> source …/setup.sh && export … && <tool> …
+> ```
+> Sourcing in one call and running in another will fail with missing libraries.
+
+## Detecting a tool — presence is not runnability
+
+`command -v <tool>` returning a path means the binary is on PATH. It does **not**
+mean the tool will run: the view can leave the binary reachable while its shared
+libraries are not on `LD_LIBRARY_PATH` (see **Runtime quirks** below). Always use
+a **functional probe** — source the view, then ask the tool for its version, in
+one command:
+
+```bash
+source /cvmfs/sft.cern.ch/lcg/views/<STACK>/<PLATFORM>/setup.sh && <tool> --version
+```
+
+A clean exit **and** a printed version banner means it is genuinely runnable. An
+`error while loading shared libraries: …` means a runtime quirk applies — fix the
+environment per the table below, do not report the tool as unavailable.
+
+## Runtime quirks (per tool)
+
+Some tools need environment beyond what `setup.sh` provides. Apply the fix, then
+re-run the functional probe. Derive paths from the tool's own `*-config` helper
+where possible so the fix survives a stack bump without hard-coding `LCG_<NNN>`.
+
+| Tool | Symptom | Fix (after sourcing the view) |
+|---|---|---|
+| Sherpa | `error while loading shared libraries: libSherpa*.so` — `setup.sh` omits Sherpa's own lib dir from `LD_LIBRARY_PATH` | `export LD_LIBRARY_PATH="$(Sherpa-config --prefix)/lib64/SHERPA-MC:$LD_LIBRARY_PATH"` |
+
+*(`Sherpa-config --prefix` resolves to the release dir whose `lib64/SHERPA-MC/`
+holds `libSherpaMain.so` etc.; verified runnable on LCG_107. Extend this table as
+other LCG tools reveal runtime quirks.)*
 
 ## Current pin
 
