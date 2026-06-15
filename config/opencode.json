@@ -45,6 +45,15 @@
         "baseURL": "https://llmgw-litellm.web.cern.ch/v1"
       },
       "models": {
+        "gpt-4.1": {
+          "name": "GPT-4.1 (flagship)",
+          "tool_call": true,
+          "temperature": true,
+          "reasoning": true,
+          "attachment": true,
+          "release_date": "2025-06-01",
+          "limit": { "context": 128000, "output": 8192 }
+        },
         "mistral-large-latest": {
           "name": "Mistral Large 2 (flagship)",
           "tool_call": true,
@@ -112,7 +121,7 @@
     }
   },
 
-  "model": "litellm/mistral-medium-latest",
+  "model": "litellm/gpt-4.1",
   "small_model": "litellm/mistral-small-latest",
 
   "mcp": {
