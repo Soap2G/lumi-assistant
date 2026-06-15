@@ -98,7 +98,7 @@ open-data-assistant-config/
 │       ├── access/                ← physlite-basics, rucio, pylhe, pyhepmc, fts-rest
 │       ├── analyze/               ← vector, fastjet (vendored from usatlas)
 │       ├── compute/               ← reana, reana-workflows, htcondor
-│       ├── reference/             ← cern-docs (cerndocs MCP), pdg-lookup, sherpa-manual (Sherpa v3.0.1 / LCG_107)
+│       ├── reference/             ← cern-docs (cerndocs MCP), pdg-lookup, sherpa-manual (Sherpa v3.0.1 / LCG_107), madgraph (MG5_aMC docs vendored from MadAgents)
 │       ├── operational/           ← verification-before-completion (vendored), analysis-review, plot-validator
 │       └── infra-advisor/         ← cross-category routing
 ├── docs/
@@ -140,6 +140,16 @@ python script/sync_vendored.py --check   # dry-run; exit 2 if drift
 To bump a pin: edit `sha` + `date` in `sources.yaml`, re-run without
 `--check`, review the diff, commit. The upstream body flows through
 unchanged; the routing-relevant fields stay under lumi's control.
+
+Larger reference corpora are vendored as **pinned snapshots** rather than
+through the `sync_vendored.py` override pipeline. The `madgraph` skill's
+`reference/` is a 27-file snapshot of the curated MadGraph docs from
+`MadGraphTeam/MadAgents` (MIT, arXiv:2601.21015), produced by
+`script/vendor/snapshot_madgraph_docs.sh` and refreshed by re-running it at a
+new pin (see that skill's `reference/_PROVENANCE.md`). It is deliberately NOT in
+`sync_vendored.py --check`: the upstream is slow-moving and structurally
+unstable, so the corpus is refreshed by a deliberate pull, not a CI drift-check.
+This mirrors the `sherpa-manual/reference/page-map.md` snapshot precedent.
 
 ## Local dev
 

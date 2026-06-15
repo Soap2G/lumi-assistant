@@ -84,7 +84,7 @@ tool. The categories present today are:
 - `compute/` — running jobs and workflows (`reana`, `reana-workflows`,
   `htcondor`).
 - `reference/` — canonical doc lookup (`cern-docs`, `pdg-lookup`,
-  `sherpa-manual`).
+  `sherpa-manual`, `madgraph`).
 - `operational/` — meta-skills about how the assistant works
   (`verification-before-completion`, vendored from obra/superpowers;
   `analysis-review`, the standalone multi-reviewer panel protocol; and
@@ -358,6 +358,21 @@ experiment axis.
   metadata of an already-produced Sherpa sample (`Sh_…` physics_short,
   cross-section, DSID) use `atlas-opendata`, and for reading Sherpa's HepMC3/LHE
   output use `pyhepmc` / `pylhe`.
+- When the user wants to configure, drive, or debug a run of **MadGraph5_aMC@NLO**
+  (`mg5_aMC`) — `.mg5` scripts (`generate`/`output`/`launch`), the cards
+  (`run_card`, `param_card`, `madspin_card`, `pythia8_card`, `delphes_card`),
+  process syntax, LO vs NLO and FxFx/MLM matching, models/UFO/SMEFT restrictions,
+  MadSpin decays, PDFs/scales, scans, systematics, or the Pythia8/Delphes/
+  MadAnalysis5 interfaces — load the `madgraph` skill. Its substance is a curated
+  doc corpus vendored from MadGraphTeam/MadAgents, read from the skill's
+  `reference/`. MG5_aMC docs are version-soft: verify numeric defaults (PDF IDs,
+  masses, run_card defaults) against the user's installation, never from memory
+  (critical rules 1 & 6). Detect the binary with `command -v mg5_aMC`; for getting
+  it on PATH defer to the LCG environment (above) or `reference/installation.md`,
+  not a hard-coded path. This is generator *configuration*; for metadata of an
+  already-produced MadGraph sample (`MG_…`/`aMC…` physics_short, cross-section,
+  DSID) use `atlas-opendata`, for reading its LHE/HepMC output use `pylhe`/`pyhepmc`,
+  and for the Sherpa generator use `sherpa-manual`.
 - When the user wants the published numerical tables (not just the
   headline value) attached to an HEP measurement — for re-fitting,
   plotting, or systematics studies — load `hepdata`. Common downstream

@@ -75,6 +75,7 @@ other LCG tools reveal runtime quirks.)*
 | Tool | Version in LCG_107 | Pinned docs / skill |
 |---|---|---|
 | Sherpa | **3.0.1p2** | manual v3.0.1 → `sherpa-manual` |
+| MadGraph5_aMC@NLO | **3.5.7** | corpus-soft → `madgraph` |
 
 *(Extend this table as more LCG-provided tools get skills.)*
 
