@@ -45,6 +45,9 @@ should_match:
       # Sample metadata for a Sherpa-produced (Sh_...) sample is atlas-opendata,
       # NOT sherpa-manual — the word "Sherpa" must not pull the config skill:
       - "What's the cross-section and sum-of-weights for the ATLAS Open Data sample Sh_2211_Zee_maxHTpTV2_BFilter?"
+      # Sample metadata for a MadGraph-produced (MG_.../aMC...) sample is atlas-opendata,
+      # NOT madgraph — "MG_" must not pull the config skill:
+      - "What's the cross-section and sumOfWeights for the ATLAS Open Data sample MG_410470_ttbar?"
 
   - skill: cern-opendata
     prompts:
@@ -99,8 +102,10 @@ should_match:
       - "How should I scale my notebook to a few hundred core-hours at CERN?"
       - "Where do I run a GPU training job at CERN — SWAN, ml.cern.ch, or OpenStack?"
       # Getting a binary on PATH / sourcing an LCG view is environment routing,
-      # NOT sherpa-manual config (lcg-stacks.md lives under infra-advisor):
+      # NOT generator-config (lcg-stacks.md lives under infra-advisor):
       - "Sherpa: command not found on lxplus — which LCG view do I need to source to get it on my PATH?"
+      # Same for MadGraph — env-setup routes here, NOT to madgraph config:
+      - "mg5_aMC: command not found on lxplus — which LCG view do I need to source to get it on PATH?"
 
   - skill: verification-before-completion
     prompts:
@@ -187,6 +192,8 @@ should_match:
       - "Read the per-event weights out of an LHE file in Python."
       - "Parse a Les Houches Event file and list the final-state particles with pylhe."
       - "How do I access the run metadata block of an LHE file?"
+      # Reading MadGraph's LHE output in Python is pylhe, NOT madgraph:
+      - "Parse the LHE file that MadGraph produced and list the final-state particles in Python."
 
   - skill: pyhepmc
     prompts:
@@ -204,6 +211,15 @@ should_match:
       - "How do I enable hard decays with branching-ratio reweighting in Sherpa's YAML config?"
       - "I have a Sherpa v2 Run.dat with a (run){...}(end) block — how do I port it to the v3 YAML steering format?"
       - "I ran Sherpa and the only output is a Results.zip with no event file — what is Results.zip and why are there no events?"
+
+  - skill: madgraph
+    prompts:
+      - "Write me a .mg5 script to generate p p > t t~ at NLO in QCD and shower it with Pythia8."
+      - "What's the MadGraph process syntax for a decay chain with a multiparticle label and an @N tag?"
+      - "How do I set up FxFx merging in MadGraph and validate it with the DJR plots?"
+      - "Which run_card.dat parameters set the beam energy, number of events, and the dynamical scale choice?"
+      - "How do I import a UFO BSM model and apply a SMEFT restriction file in MadGraph?"
+      - "I launched mg5_aMC and got Events/run_01/ with an LHE file and a cross-section banner — what's in them and how is the weight normalised?"
 
   - skill: analysis-review
     prompts:

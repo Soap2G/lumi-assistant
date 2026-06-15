@@ -1,6 +1,6 @@
 ---
 name: sherpa-manual
-description: Use when the user wants to configure, set up, debug, or understand a run of the Sherpa Monte Carlo event generator (v3.0.1, the version in the current CERN LCG stack) — writing or fixing the `Sherpa.yaml` YAML steering file, defining the `PROCESSES` block with PDG codes and particle containers, choosing matrix-element generators (Comix / Amegic), parton showers, multijet merging (MEPS@NLO / CKKW) or NLO matching (MC@NLO), beams / PDFs / scale variations / selectors, hadronization, hard decays, the `Sherpa` command-line options (`-e`, `-p`, `-a`, `-R`, …), or interpreting a run's output artifacts — what `Results.zip` / the cached integration grid is, and why a run wrote no events. Answers come from the canonical Sherpa v3.0.1 manual (a Sphinx site) via WebFetch; the page map is baked in. CRITICAL: Sherpa v3 uses YAML steering (`Sherpa.yaml`) — NOT the legacy v2 `Run.dat` `(run){…}(end)` syntax, and v2 steering files are not reusable. Does NOT cover ATLAS Open Data Sherpa-produced sample metadata — DSIDs, `physics_short` names like `Sh_2211_Zee_…`, cross-sections, k-factors, sumOfWeights (use `atlas-opendata`); reading Sherpa's HepMC3 output event records (use `pyhepmc`) or Les Houches Event files (use `pylhe`); how to get the Sherpa binary on PATH / which LCG view to source (that is environment setup, not config); other generators Pythia / Herwig / MadGraph / Powheg (not yet covered); or CERN service / batch / grid documentation (use `cern-docs`). Disambiguator phrase: Sherpa.yaml steering configuration.
+description: Use when the user wants to configure, set up, debug, or understand a run of the Sherpa Monte Carlo event generator (v3.0.1, the version in the current CERN LCG stack) — writing or fixing the `Sherpa.yaml` YAML steering file, defining the `PROCESSES` block with PDG codes and particle containers, choosing matrix-element generators (Comix / Amegic), parton showers, multijet merging (MEPS@NLO / CKKW) or NLO matching (MC@NLO), beams / PDFs / scale variations / selectors, hadronization, hard decays, the `Sherpa` command-line options (`-e`, `-p`, `-a`, `-R`, …), or interpreting a run's output artifacts — what `Results.zip` / the cached integration grid is, and why a run wrote no events. Answers come from the canonical Sherpa v3.0.1 manual (a Sphinx site) via WebFetch; the page map is baked in. CRITICAL: Sherpa v3 uses YAML steering (`Sherpa.yaml`) — NOT the legacy v2 `Run.dat` `(run){…}(end)` syntax, and v2 steering files are not reusable. Does NOT cover ATLAS Open Data Sherpa-produced sample metadata — DSIDs, `physics_short` names like `Sh_2211_Zee_…`, cross-sections, k-factors, sumOfWeights (use `atlas-opendata`); reading Sherpa's HepMC3 output event records (use `pyhepmc`) or Les Houches Event files (use `pylhe`); how to get the Sherpa binary on PATH / which LCG view to source (that is environment setup, not config); the MadGraph generator (use `madgraph`); other generators Pythia / Herwig / Powheg (not yet covered); or CERN service / batch / grid documentation (use `cern-docs`). Disambiguator phrase: Sherpa.yaml steering configuration.
 data_scope: both
 experiment: all
 ---
@@ -47,8 +47,10 @@ Do NOT load this skill for:
   Availability section below — do not answer it from a hard-coded path.
 - **Reading Sherpa's output event files** in Python — HepMC3 records →
   **`pyhepmc`**; Les Houches Event (LHE) files → **`pylhe`**.
-- **A different generator** — Pythia, Herwig, MadGraph, Powheg, alpgen. Not yet
-  covered by lumi; do not answer from memory. Say so and stop.
+- **The MadGraph generator** (`generate`, `.mg5` scripts, `run_card`) →
+  **`madgraph`**.
+- **Other generators** — Pythia, Herwig, Powheg, alpgen — not yet covered by
+  lumi; do not answer from memory. Say so and stop.
 - **CERN service / batch / grid documentation** ("how do I submit the Sherpa job
   to lxbatch") → **`cern-docs`** (`source=batch`) or `htcondor`.
 - **Canonical particle constants** (a mass / width to put in a model) →
