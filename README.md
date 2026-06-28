@@ -39,6 +39,14 @@ follow the [Skill Library Design Guide](docs/skill-design.md)
 (especially **Principle 7** — the per-skill growth checklist plus
 3–5 eval prompts), and it ships on the next CVMFS publish.
 
+## How to use it
+Users on any lxplus / SWAN / workstation with the CVMFS mount then do:
+
+```bash
+source /cvmfs/sw.escape.eu/etc/lumi/atom-assistant/latest/bin/setup.sh
+lumi    # or opencode
+```
+
 ## How skills compose
 
 Skills don't have to live in this repo. Three layers stack:
