@@ -48,6 +48,9 @@ should_match:
       # Sample metadata for a MadGraph-produced (MG_.../aMC...) sample is atlas-opendata,
       # NOT madgraph — "MG_" must not pull the config skill:
       - "What's the cross-section and sumOfWeights for the ATLAS Open Data sample MG_410470_ttbar?"
+      # fastframes cliff guard: DSID metadata that FEEDS a FastFrames config is atlas-opendata,
+      # NOT fastframes — the word "FastFrames" must not pull the config skill:
+      - "What cross-section and sumOfWeights do I put in my FastFrames xsection inputs for DSID 410470?"
 
   - skill: cern-opendata
     prompts:
@@ -62,6 +65,8 @@ should_match:
       - "Which branches do I read for calibrated muons in PHYSLITE?"
       - "Reconstruct small-R jets and MET from a PHYSLITE file."
       - "Apply the MC normalisation formula when reading PHYSLITE."
+      # fastframes cliff guard: reading a FastFrames output ntuple with uproot is physlite-basics, not fastframes:
+      - "Open the FastFrames output ntuple and plot the jet_pt branch with uproot in Python."
 
   - skill: rucio
     prompts:
@@ -220,6 +225,17 @@ should_match:
       - "Which run_card.dat parameters set the beam energy, number of events, and the dynamical scale choice?"
       - "How do I import a UFO BSM model and apply a SMEFT restriction file in MadGraph?"
       - "I launched mg5_aMC and got Events/run_01/ with an LHE file and a cross-section banner — what's in them and how is the weight normalised?"
+
+  - skill: fastframes
+    prompts:
+      - "Write me a FastFrames config.yml to histogram a ttbar signal region with nominal and JES systematics."
+      - "In FastFrames, how do I run ntupling mode and keep only the jet_pt and weight_total branches? Which --step?"
+      - "What goes in the FastFrames general block — input_filelist_path, luminosity per campaign, number_of_cpus, xsection_files?"
+      - "How do I produce the filelist.txt and sum_of_weights.txt metadata before running FastFrames?"
+      - "Split my FastFrames samples across 20 HTCondor jobs with batch_submit.py and submit them."
+      - "Generate a TRExFitter config from my FastFrames config with produce_trexfitter_config.py."
+      # histogramming TopCPToolkit output is fastframes, not topcptoolkit:
+      - "I have TopCPToolkit output ntuples — histogram them into my signal and control regions with systematics."
 
   - skill: analysis-review
     prompts:

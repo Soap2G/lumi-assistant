@@ -96,7 +96,7 @@ open-data-assistant-config/
 │       ├── learn/                 ← atlas-notebooks, sm-analyses
 │       ├── discover/              ← atlas-opendata, cern-opendata, hepdata, read-publication
 │       ├── access/                ← physlite-basics, rucio, pylhe, pyhepmc, fts-rest
-│       ├── analyze/               ← vector, fastjet (vendored from usatlas)
+│       ├── analyze/               ← vector, fastjet (vendored from usatlas), fastframes (FastFrames RDataFrame framework, docs via cerndocs MCP)
 │       ├── compute/               ← reana, reana-workflows, htcondor
 │       ├── reference/             ← cern-docs (cerndocs MCP), pdg-lookup, sherpa-manual (Sherpa v3.0.1 / LCG_107), madgraph (MG5_aMC docs vendored from MadAgents)
 │       ├── operational/           ← verification-before-completion (vendored), analysis-review, plot-validator

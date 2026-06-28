@@ -80,7 +80,7 @@ tool. The categories present today are:
 - `access/` — getting bytes local (`physlite-basics`, `rucio`,
   `pylhe`, `pyhepmc`, `fts-rest`).
 - `analyze/` — computing on data already in memory (`vector`,
-  `fastjet`).
+  `fastjet`) and analysis frameworks (`fastframes`).
 - `compute/` — running jobs and workflows (`reana`, `reana-workflows`,
   `htcondor`).
 - `reference/` — canonical doc lookup (`cern-docs`, `pdg-lookup`,
@@ -373,6 +373,25 @@ experiment axis.
   already-produced MadGraph sample (`MG_…`/`aMC…` physics_short, cross-section,
   DSID) use `atlas-opendata`, for reading its LHE/HepMC output use `pylhe`/`pyhepmc`,
   and for the Sherpa generator use `sherpa-manual`.
+- When the user wants to configure, drive, or debug a run of **FastFrames** —
+  the ATLAS RDataFrame histogramming / ntuple-reprocessing framework
+  (`atlas-amglab/fastframes`): the YAML `config.yml` blocks (`general`,
+  `samples`, `regions`, `ntuples`, `systematics`, `cutflows`,
+  `truth_processing`, `unfolding`, …), running `FastFrames.py -c config.yml
+  --step h|n`, the metadata step (`produce_metadata_files.py`), defining
+  columns / a custom class, distributed running (`--split_n_jobs` /
+  `batch_submit.py`), or the TRExFitter config hand-off
+  (`produce_trexfitter_config.py`) — load the `fastframes` skill. It answers
+  from the canonical FastFrames MkDocs docs via the `cerndocs` MCP
+  (`search_docs` / `fetch_doc` with `source="fastframes"`; page map baked in
+  `reference/page-map.md`, WebFetch fallback). FastFrames is version-soft:
+  verify config keys against the user's built version + changelog, never from
+  memory (critical rules 1 & 6). FastFrames is built from source off `asetup
+  StatAnalysis,<ver>` — not an LCG view. This is the analysis *framework*; for
+  the INPUT ntuples (TopCPToolkit) use `topcptoolkit`, for the binned-likelihood
+  FIT (TRExFitter / `pyhf`) it only writes the config + histograms, for DSID
+  cross-section metadata use `atlas-opendata`, for reading a branch in Python
+  use `physlite-basics`, and for raw HTCondor ops use `htcondor`.
 - When the user wants the published numerical tables (not just the
   headline value) attached to an HEP measurement — for re-fitting,
   plotting, or systematics studies — load `hepdata`. Common downstream
