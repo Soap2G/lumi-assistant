@@ -80,7 +80,8 @@ tool. The categories present today are:
 - `access/` — getting bytes local (`physlite-basics`, `rucio`,
   `pylhe`, `pyhepmc`, `fts-rest`).
 - `analyze/` — computing on data already in memory (`vector`,
-  `fastjet`) and analysis frameworks (`fastframes`).
+  `fastjet`) and analysis frameworks (`topcptoolkit` ntuple production,
+  `fastframes` histogramming).
 - `compute/` — running jobs and workflows (`reana`, `reana-workflows`,
   `htcondor`).
 - `reference/` — canonical doc lookup (`cern-docs`, `pdg-lookup`,
@@ -392,6 +393,22 @@ experiment axis.
   FIT (TRExFitter / `pyhf`) it only writes the config + histograms, for DSID
   cross-section metadata use `atlas-opendata`, for reading a branch in Python
   use `physlite-basics`, and for raw HTCondor ops use `htcondor`.
+- When the user wants to configure, drive, or debug a run of **TopCPToolkit** —
+  the ATLAS CP-algorithm **ntuple-production** framework
+  (`atlas/amg/software/TopCPToolkit`): the block-based YAML config (per-object
+  CP blocks `Electrons`/`Muons`/`Jets`/`MissingET`/…, `ObjectSelection`,
+  `EventSelection`, `Overlap`, `Output`/ntupling, the universal `skipOnData` /
+  `onlyForDSIDs` / `propertyOverrides` flags), running the `runTop_el.py` driver
+  (`-i inputs.txt -o output -t <config> --no-systematics -e N --parton
+  --particle`), or grid submission — load the `topcptoolkit` skill. It answers
+  from the canonical TopCPToolkit MkDocs docs via the `cerndocs` MCP
+  (`search_docs` / `fetch_doc` with `source: topcptoolkit`; WebFetch fallback).
+  Version-soft: verify CP-block keys against the user's built release-25 version
+  + changelog, never from memory (critical rules 1 & 6). Built from source off
+  `asetup` of an ATLAS release — not an LCG view. This is ntuple **production**;
+  for HISTOGRAMMING those ntuples (regions, TRExFitter inputs) use `fastframes`,
+  for reading a branch in Python use `physlite-basics`, for staging the DAODs
+  use `rucio`, and for DSID metadata use `atlas-opendata`.
 - When the user wants the published numerical tables (not just the
   headline value) attached to an HEP measurement — for re-fitting,
   plotting, or systematics studies — load `hepdata`. Common downstream
