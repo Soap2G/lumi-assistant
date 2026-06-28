@@ -24,9 +24,9 @@ Upstream documentation (pinned): the FastFrames MkDocs site,
 > **Version note — read before answering.** FastFrames is **version-soft**:
 > the config schema (block names, keys, defaults) and the recommended
 > `asetup StatAnalysis,<ver>` evolve across the framework's frequent releases.
-> The tutorial currently pins `v7.1.1` with `StatAnalysis,0.8.0`, but **do not
-> quote a config key, default, or StatAnalysis version as the user's** — verify
-> against their built FastFrames version and the **changelog**
+> The installation page's example currently uses `asetup StatAnalysis,0.8.0`,
+> but **do not quote a config key, default, or StatAnalysis version as the
+> user's** — verify against their built FastFrames version and the **changelog**
 > (`.../latest/changelog/`). Fabricating a config key is a critical-rule-1
 > violation (the same discipline as not inventing physics numbers).
 
