@@ -79,6 +79,11 @@ should_match:
       - "Look up the cross-section for an internal ATLAS DSID that isn't in any Open Data release."
       # topcptoolkit cliff guard: staging the DAOD input files is rucio, not topcptoolkit:
       - "Download the DAOD_PHYS files for my TopCPToolkit input list from the grid with Rucio."
+      # MCP-transport prompts: authenticated catalogue reads without a local client:
+      - "I'm not on lxplus and have no rucio client installed — can you still check where my mc23 dataset has replicas?"
+      - "Query the ATLAS Rucio catalogue for the size and file count of an internal container without setting up a VOMS proxy."
+      - "Check my Rucio storage quota on the FCC datalake."
+      - "List the replication rules on a CMS dataset through the Rucio MCP server."
 
   - skill: reana
     prompts:

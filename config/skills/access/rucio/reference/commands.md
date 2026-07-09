@@ -8,9 +8,38 @@ Authoritative upstream source:
 https://github.com/rucio/rucio/tree/master/lib/rucio/cli
 
 ## Contents
+- MCP tool ↔ CLI command mapping
 - CLI shape and top-level groups
 - Read-only commands (identity, RSEs, DIDs, metadata, replicas, rules, accounts, scopes, replica state)
 - Write operations (data movement, DID lifecycle, rules, replicas, admin-level)
+
+## MCP tool ↔ CLI command mapping
+
+The `rucio-atlas` / `rucio-cms` / `rucio-escape` / `rucio-fcc` MCP
+servers ([kratsg/rucio-mcp](https://github.com/kratsg/rucio-mcp))
+expose the read surface as tools named `<server>_<tool>`, e.g.
+`rucio-atlas_rucio_list_dids`. The tool names mirror the *deprecated*
+flat-verb CLI — never copy them into a shell command.
+
+| Intent | MCP tool | CLI (v38 noun-verb) |
+|---|---|---|
+| Identity | `rucio_whoami`, `rucio_ping` | `rucio whoami`, `rucio ping` |
+| Search DIDs | `rucio_list_dids` | `rucio did list '<scope>:<pattern>'` |
+| DID type/size/status | `rucio_get_did` | `rucio did show <did>` |
+| Children of a collection | `rucio_list_content`, `rucio_list_files` | `rucio did content list <did>` |
+| Parents | `rucio_list_parent_dids` | `rucio did show <did>` |
+| Metadata | `rucio_get_metadata` | `rucio did metadata list <did>` |
+| File replicas / PFNs | `rucio_list_replicas` | `rucio replica list file <did>` |
+| Dataset/container replicas | `rucio_list_dataset_replicas`, `rucio_list_container_replicas` | `rucio replica list dataset <did>` |
+| Rules on a DID | `rucio_list_did_rules` | `rucio rule list <did>` |
+| Rule detail / history | `rucio_get_replication_rule`, `rucio_list_rule_history` | `rucio rule show <rule_id>`, `rucio rule history <rule_id>` |
+| RSEs | `rucio_list_rses`, `rucio_get_rse`, `rucio_list_rse_attributes`, `rucio_get_rse_usage` | `rucio rse list`, `rucio rse show <RSE>`, `rucio rse attribute list <RSE>` |
+| Quotas / account | `rucio_get_local_account_limits`, `rucio_get_local_account_usage`, `rucio_get_account` | `rucio account limit list <a>`, `rucio account show <a>` |
+| Scopes | `rucio_list_scopes`, `rucio_list_scopes_for_account` | `rucio scope list` |
+| Subscriptions | `rucio_list_subscriptions`, `rucio_list_subscription_rules` | `rucio subscription list` |
+| Dataset locks | `rucio_get_dataset_locks`, `rucio_get_dataset_locks_by_rse` | *(no direct v38 CLI equivalent)* |
+| Download / upload | **none — CLI only** | `rucio download <did>`, `rucio upload …` |
+| Rule writes | **disabled in this config** | `rucio rule add/move/update/remove` (confirmation-gated) |
 
 ## CLI shape
 

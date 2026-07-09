@@ -1,9 +1,33 @@
 ---
 name: rucio
-description: Use when the user runs the Rucio v38+ CLI on lxplus, SWAN, or a CVMFS-staged client (under `/cvmfs/sw.escape.eu/rucio/<version>/`) and needs to query DIDs, RSEs, replicas, metadata, or replication rules for collaboration-internal data. ALWAYS noun-verb (`rucio rse list`, `rucio did show`, `rucio rule add`); NEVER the deprecated flat verbs (`list-rses`, `list-dids`, `add-rule`, `get-metadata`, `rule-info`). Targets non-public datasets — for ATLAS Open Data DSIDs use `atlas-opendata` instead; for grid submission use PanDA, not Rucio directly. Disambiguator phrase: rucio v38 noun-verb.
+description: Use when the user needs authenticated Rucio data-management queries — DIDs, RSEs, replicas, metadata, replication rules — on collaboration-internal data, via EITHER the remote `rucio-*` MCP tools (rucio-atlas, rucio-cms, rucio-escape, rucio-fcc; per-user SSO, no local client needed) OR the Rucio v38+ CLI on lxplus, SWAN, or a CVMFS-staged client (`/cvmfs/sw.escape.eu/rucio/<version>/`). Read queries default to the MCP tools; `rucio download`/`upload` and rule writes require the CLI. CLI is ALWAYS noun-verb (`rucio rse list`, `rucio did show`, `rucio rule add`); NEVER the deprecated flat verbs (`list-rses`, `list-dids`, `add-rule`, `get-metadata`, `rule-info`) even though MCP tool names (`rucio_list_dids`) resemble them. Targets non-public datasets — for ATLAS Open Data DSIDs use `atlas-opendata` instead; for grid submission use PanDA, not Rucio directly. Disambiguator phrase: rucio v38 noun-verb.
 data_scope: internal
 experiment: all
 ---
+
+## Transport selection: MCP tools vs CLI
+
+Rucio is reachable over two transports. Pick per flow, not per session:
+
+| Flow | Transport | Why |
+|---|---|---|
+| DID discovery, metadata, replica location, rule *inspection*, RSE/account/quota queries | **MCP tools** (`rucio-atlas_*`, `rucio-cms_*`, `rucio-escape_*`, `rucio-fcc_*`) | Per-user SSO token, no `rucio.cfg`/VOMS/CLI needed, works off-lxplus |
+| `rucio download` / `rucio upload` (moving bytes to/from the user's disk) | **CLI only** | The MCP server has no download/upload tools — it cannot move bytes to the user's machine |
+| Rule writes (`rule add/move/update/remove`) | **CLI only, with explicit user confirmation** | The MCP rule-write tools are disabled in this config; the CLI path is permission-gated (ask/deny) |
+| Scripting / loops over many DIDs the user will re-run | **CLI** | Reproducible outside the assistant |
+
+Pick the MCP server matching the user's VO: `rucio-atlas` for ATLAS,
+`rucio-cms` for CMS, `rucio-escape` for the ESCAPE datalake,
+`rucio-fcc` for FCC. On first use the user is sent through a browser
+SSO login; the resulting token is their own Rucio identity
+(`rucio-atlas_rucio_whoami` confirms the mapped account). If the OAuth
+login cannot complete (e.g. SSH session with no browser), fall back to
+the CLI path below.
+
+**Naming firewall**: MCP tool names (`rucio_list_dids`,
+`rucio_get_metadata`) deliberately mirror Rucio's *deprecated* flat-verb
+CLI. Never let them leak into a shell command — anything you type after
+`rucio ` in Bash must be noun-verb.
 
 ## CRITICAL: emit only v38+ noun-verb commands
 
@@ -34,13 +58,15 @@ rewrite it as `rucio <noun> <verb>`. The full catalogue lives in
 
 ## Scope
 
-Use this skill when the user:
+Use this skill when the user is working with real experiment data
+(not ATLAS Open Data files). The MCP transport has no local
+prerequisites beyond completing the browser SSO login. The CLI
+transport additionally requires:
 
-- has the `rucio` command on their PATH, **and**
-- has a working `rucio.cfg` plus the credential that matches its
+- the `rucio` command on their PATH, **and**
+- a working `rucio.cfg` plus the credential that matches its
   `auth_type` (VOMS proxy for `x509_proxy`, cached OIDC token for
-  `oidc`, etc.), **and**
-- is working with real experiment data (not ATLAS Open Data files).
+  `oidc`, etc.).
 
 For public ATLAS Open Data release samples, use `atlas-opendata`
 (`atlas_get_urls`) or `cern-opendata` (`cod_list_files`) instead.
@@ -49,7 +75,12 @@ Do **not** invoke write operations (`rucio rule add`, `rucio did add`,
 `rucio upload`, `rucio rule remove`, …) without explicit user
 confirmation. Several destructive variants (`rule remove`,
 `did remove`, `replica remove`, `rse remove`, `account remove`,
-`erase`) are denied by default in opencode's permissions.
+`erase`) are denied by default in opencode's permissions. The MCP
+rule-write tools (`rucio_add_rule`, `rucio_delete_rule`,
+`rucio_update_rule`, `rucio_move_rule`, `rucio_reduce_rule`,
+`rucio_approve_rule`, `rucio_deny_rule`) are disabled in this
+config's `tools` block — never attempt them; route any write through
+the CLI so the permission gate applies.
 
 ## Reference files
 
@@ -144,13 +175,19 @@ Write ops needing user confirmation:
 
 ## Workflow
 
-1. **Prereqs**: `rucio whoami`; if it fails, read `reference/auth.md`.
-2. **Locate the DID**: `rucio did list '<scope>:<pattern>'`, then
-   `rucio did show <scope>:<name>` to confirm type and size.
+1. **Pick the transport** (table above). For reads, prefer the MCP
+   server matching the user's VO; sanity-check identity with
+   `rucio-<vo>_rucio_whoami`. For the CLI path: `rucio whoami`; if it
+   fails, read `reference/auth.md`.
+2. **Locate the DID**: `rucio_list_dids` (MCP) or `rucio did list
+   '<scope>:<pattern>'`, then `rucio_get_did` / `rucio did show
+   <scope>:<name>` to confirm type and size.
 3. **Pick the follow-up** from the quick-reference table above, based
-   on the user's intent.
-4. **For writes**: show the exact command (including any RSE
-   expression) and request explicit confirmation before running.
+   on the user's intent (MCP↔CLI mapping in
+   [reference/commands.md](reference/commands.md)).
+4. **For writes and downloads**: switch to the CLI, show the exact
+   command (including any RSE expression), and request explicit
+   confirmation before running.
 
 ## Pitfalls
 

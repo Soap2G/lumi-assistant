@@ -139,7 +139,37 @@
       "type": "remote",
       "url": "https://cern-mkdocs-mcp.app.cern.ch/mcp",
       "oauth": false
+    },
+    "rucio-atlas": {
+      "type": "remote",
+      "url": "https://rucio-mcp.app.cern.ch/site/atlas",
+      "timeout": 30000
+    },
+    "rucio-cms": {
+      "type": "remote",
+      "url": "https://rucio-mcp.app.cern.ch/site/cms",
+      "timeout": 30000
+    },
+    "rucio-escape": {
+      "type": "remote",
+      "url": "https://rucio-mcp.app.cern.ch/site/escape",
+      "timeout": 30000
+    },
+    "rucio-fcc": {
+      "type": "remote",
+      "url": "https://rucio-mcp-fcc.app.cern.ch/site/fcc",
+      "timeout": 30000
     }
+  },
+
+  "tools": {
+    "rucio-*_rucio_add_rule": false,
+    "rucio-*_rucio_delete_rule": false,
+    "rucio-*_rucio_update_rule": false,
+    "rucio-*_rucio_reduce_rule": false,
+    "rucio-*_rucio_move_rule": false,
+    "rucio-*_rucio_approve_rule": false,
+    "rucio-*_rucio_deny_rule": false
   },
 
   "permission": {

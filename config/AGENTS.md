@@ -62,9 +62,9 @@ yourself as (only) an Open Data assistant.
 - Python is the primary language. Prefer `uproot`, `awkward`, `coffea`,
   `mplhep`, `hist`, `pyhf`. PyROOT is fine when the user is clearly
   using ROOT.
-- You have access to three remote MCP servers providing structured
-  access to ATLAS Open Data metadata, the CERN Open Data portal, and
-  canonical CERN service documentation:
+- You have access to remote MCP servers providing structured access
+  to ATLAS Open Data metadata, the CERN Open Data portal, canonical
+  CERN service documentation, and authenticated Rucio catalogues:
   - **atlasopenmagic** — ATLAS-only metadata: DSIDs, `physics_short`
     names, cross-sections, k-factors, filter efficiencies, MC weights,
     file URLs per release (`2024r-pp`, `2025r-evgen-13tev`, etc.). Use
@@ -82,11 +82,23 @@ yourself as (only) an Open Data assistant.
     legacy **GitBook** site, FTS3 / File Transfer Service (`fts`). Use
     `search_docs` first (BM25, token-cheap), then `fetch_doc` with
     `mode="outline"` or `mode="markdown"` to read a page.
+  - **rucio-atlas / rucio-cms / rucio-escape / rucio-fcc** —
+    per-VO [rucio-mcp](https://github.com/kratsg/rucio-mcp) servers
+    for **authenticated** Rucio queries on collaboration-internal
+    data: DIDs, metadata, replicas, rules, RSEs, quotas. OAuth
+    per-user login (the token IS the user's Rucio identity); first
+    use triggers a browser SSO flow. Read-only from this config: the
+    rule-write tools are disabled in `opencode.json`'s `tools` block,
+    and there are no download/upload tools — byte movement and rule
+    writes go through the `rucio` CLI (see the `rucio` skill).
   - Routing: prefer **atlasopenmagic** for DSID / `physics_short` /
     ATLAS release lookups; prefer **cernopendata** for portal
     records (recid / DOI / title); prefer **cerndocs** for "how does
     this CERN service work" questions where the answer is in
-    operator documentation.
+    operator documentation; prefer the **rucio-*** server matching
+    the user's VO for internal-data catalogue queries, falling back
+    to the Rucio CLI when the user needs bytes on disk, writes, or
+    has no browser for the SSO login.
 
 ## Library structure
 
@@ -273,7 +285,11 @@ experiment axis.
   and have them use `uproot.open` with an `https://` or `root://` URI
   from `atlas_get_urls` / `cod_list_files`.
 - When the user asks about real (non-Open-Data) datasets, replicas,
-  or transfer rules, and `rucio` is on PATH, load the `rucio` skill.
+  or transfer rules, load the `rucio` skill. It routes between two
+  transports: the `rucio-*` MCP tools for read queries (no local
+  client needed — works even off-lxplus) and the CLI for downloads,
+  uploads, rule writes, and scripting. Pick the MCP server by VO
+  (`rucio-atlas`, `rucio-cms`, `rucio-escape`, `rucio-fcc`).
   **Never emit deprecated flat-verb Rucio commands** (`rucio list-*`,
   `rucio add-rule`, `rucio delete-rule`, `rucio rule-info`,
   `rucio get-metadata`, `rucio stat`). Rucio 36+ uses a noun-verb
