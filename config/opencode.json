@@ -143,22 +143,34 @@
     "rucio-atlas": {
       "type": "remote",
       "url": "https://rucio-mcp.app.cern.ch/site/atlas",
-      "timeout": 30000
+      "timeout": 30000,
+      "oauth": {
+        "clientId": "https://raw.githubusercontent.com/Soap2G/lumi-assistant/main/config/cimd/opencode.json"
+      }
     },
     "rucio-cms": {
       "type": "remote",
       "url": "https://rucio-mcp.app.cern.ch/site/cms",
-      "timeout": 30000
+      "timeout": 30000,
+      "oauth": {
+        "clientId": "https://raw.githubusercontent.com/Soap2G/lumi-assistant/main/config/cimd/opencode.json"
+      }
     },
     "rucio-escape": {
       "type": "remote",
       "url": "https://rucio-mcp.app.cern.ch/site/escape",
-      "timeout": 30000
+      "timeout": 30000,
+      "oauth": {
+        "clientId": "https://raw.githubusercontent.com/Soap2G/lumi-assistant/main/config/cimd/opencode.json"
+      }
     },
     "rucio-fcc": {
       "type": "remote",
       "url": "https://rucio-mcp-fcc.app.cern.ch/site/fcc",
-      "timeout": 30000
+      "timeout": 30000,
+      "oauth": {
+        "clientId": "https://raw.githubusercontent.com/Soap2G/lumi-assistant/main/config/cimd/opencode.json"
+      }
     }
   },
 
