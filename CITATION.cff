@@ -1,12 +1,15 @@
 cff-version: 1.2.0
 message: "If you use this software in academic work, please cite it as below."
-title: "lumi-assistant: an opencode configuration for ATLAS Open Data and CERN Open Data"
+title: "lumi-assistant: an opencode configuration for a general CERN assistant"
 abstract: >
   A configuration bundle for the opencode / lumi agent CLI, providing
   intent-organised skills, sub-agent personas, remote MCP wiring
-  (atlasopenmagic, cernopendata) and CVMFS-deployable packaging for
-  ATLAS Open Data and broader CERN Open Data workflows on Binder,
-  Colab, SWAN, lxplus, and local Jupyter installs.
+  (atlasopenmagic, cernopendata, cerndocs) and CVMFS-deployable
+  packaging for a general CERN assistant covering service operations
+  (Rucio, FTS, REANA, HTCondor), computing, and physics analysis —
+  from the public ATLAS / CERN Open Data releases to internal
+  analysis frameworks — on lxplus, SWAN, Binder, Colab, and local
+  Jupyter installs.
 type: software
 authors:
   - family-names: Guerrieri

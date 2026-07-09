@@ -69,11 +69,13 @@ loop and open an issue tagged `service-onboarding` to coordinate.
 
 ## Layout
 
-The skills present today are the **seed library** — the project
-deliberately starts narrow (open data) so the routing pattern is
-exercised at small scale before the library expands toward the full
-CERN scope (see the design guide for the eight intent categories the
-library is designed to grow into).
+The library started narrow (open data) so the routing pattern could
+be exercised at small scale, and has since grown beyond that seed: it
+now also covers service operations (Rucio, FTS, REANA, HTCondor),
+internal analysis frameworks (TopCPToolkit, FastFrames), and MC
+generator configuration (Sherpa, MadGraph) alongside the original
+open-data skills (see the design guide for the eight intent
+categories the library is designed to grow into).
 
 ```
 open-data-assistant-config/
