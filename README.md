@@ -114,7 +114,8 @@ open-data-assistant-config/
 ├── docs/
 │   └── skill-design.md            ← Skill Library Design Guide (vendor target)
 ├── bin/
-│   └── setup.sh                   ← sourced by users (any prefix)
+│   ├── setup.sh                   ← sourced by users (any prefix)
+│   └── lumi-rucio-auth            ← browserless OAuth login for rucio-* MCP
 ├── script/
 │   ├── cvmfs-deploy.sh            ← stage and optionally publish
 │   ├── sync_vendored.py           ← rebuild vendored skills from upstream

@@ -84,6 +84,8 @@ should_match:
       - "Query the ATLAS Rucio catalogue for the size and file count of an internal container without setting up a VOMS proxy."
       - "Check my Rucio storage quota on the FCC datalake."
       - "List the replication rules on a CMS dataset through the Rucio MCP server."
+      # browserless-auth prompt: lumi-rucio-auth helper for SSH-only hosts:
+      - "I'm on lxplus over SSH and the Rucio MCP login dead-ends on an unreachable 127.0.0.1 page — how do I authenticate without a local browser?"
 
   - skill: reana
     prompts:

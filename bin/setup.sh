@@ -35,6 +35,12 @@ fi
 
 export OPENCODE_CONFIG_DIR="$_oda_config"
 
+# Expose helper tools shipped in bin/ (lumi-rucio-auth, ...).
+case ":$PATH:" in
+  *":$_oda_bin:"*) ;;
+  *) export PATH="$_oda_bin:$PATH" ;;
+esac
+
 # Comment the next line out to keep project .opencode/ layering on top.
 export OPENCODE_DISABLE_PROJECT_CONFIG=1
 

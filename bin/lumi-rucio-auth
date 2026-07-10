@@ -1,0 +1,262 @@
+#!/usr/bin/env python3
+"""OAuth login helper for the rucio-mcp servers, for hosts without a local browser.
+
+The rucio-mcp OAuth bridge finishes the login by redirecting the browser to
+http://127.0.0.1:19876/... — which only works when the browser runs on the
+same machine as opencode. On SSH-only hosts (lxplus) the redirect dead-ends
+in the user's laptop browser. This helper closes the gap the same way
+`gcloud auth login --no-launch-browser` does:
+
+  1. prints the authorization URL (open it in any browser, on any device)
+  2. after login the browser lands on an unreachable http://127.0.0.1:19876/...
+     page — copy that full URL from the address bar
+  3. paste it back here; the helper exchanges the code (the PKCE verifier
+     never left this machine) and writes the token where opencode expects it
+     (~/.local/share/opencode/mcp-auth.json)
+
+Usage:
+  lumi-rucio-auth <server>            interactive: prints URL, waits for paste
+  lumi-rucio-auth <server> --start    print URL and exit (state kept on disk)
+  lumi-rucio-auth <server> --finish <callback-url>
+                                      complete a --start'ed flow
+  lumi-rucio-auth --list              show servers found in the lumi config
+
+<server> is an MCP server name from config/opencode.json (rucio-fcc,
+rucio-atlas, ...). Tokens are Rucio session tokens (~90 min); re-run when
+expired. Only stdlib is used.
+"""
+
+import argparse
+import base64
+import hashlib
+import json
+import os
+import secrets
+import stat
+import sys
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+
+REDIRECT_URI = "http://127.0.0.1:19876/mcp/oauth/callback"
+PENDING_DIR = os.path.join(
+    os.environ.get("XDG_CACHE_HOME", os.path.expanduser("~/.cache")),
+    "lumi-rucio-auth",
+)
+
+
+def config_path():
+    cfg_dir = os.environ.get("OPENCODE_CONFIG_DIR")
+    if not cfg_dir:
+        # fall back to the config/ tree this script ships with
+        here = os.path.dirname(os.path.realpath(__file__))
+        cfg_dir = os.path.join(os.path.dirname(here), "config")
+    return os.path.join(cfg_dir, "opencode.json")
+
+
+def load_servers():
+    """Return {name: {"url": ..., "client_id": ...}} for OAuth MCP servers."""
+    path = config_path()
+    try:
+        with open(path) as f:
+            cfg = json.load(f)
+    except OSError as e:
+        sys.exit(f"error: cannot read opencode config at {path}: {e}")
+    servers = {}
+    for name, entry in cfg.get("mcp", {}).items():
+        oauth = entry.get("oauth")
+        if isinstance(oauth, dict) and oauth.get("clientId"):
+            servers[name] = {"url": entry["url"].rstrip("/"),
+                            "client_id": oauth["clientId"]}
+    return servers
+
+
+def http_json(url, data=None):
+    req = urllib.request.Request(url, data=data)
+    if data is not None:
+        req.add_header("Content-Type", "application/x-www-form-urlencoded")
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return json.load(resp)
+    except urllib.error.HTTPError as e:
+        body = e.read().decode(errors="replace")[:500]
+        sys.exit(f"error: {url} returned HTTP {e.code}: {body}")
+    except (urllib.error.URLError, TimeoutError) as e:
+        sys.exit(f"error: cannot reach {url}: {e}")
+
+
+def as_metadata(server_url):
+    u = urllib.parse.urlsplit(server_url)
+    meta_url = f"{u.scheme}://{u.netloc}/.well-known/oauth-authorization-server{u.path}"
+    return http_json(meta_url)
+
+
+def pending_file(name):
+    return os.path.join(PENDING_DIR, f"{name}.json")
+
+
+def save_pending(name, record):
+    os.makedirs(PENDING_DIR, mode=0o700, exist_ok=True)
+    path = pending_file(name)
+    with open(path, "w") as f:
+        json.dump(record, f)
+    os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
+
+
+def build_authorize(name, server):
+    meta = as_metadata(server["url"])
+    verifier = secrets.token_urlsafe(48)
+    challenge = base64.urlsafe_b64encode(
+        hashlib.sha256(verifier.encode()).digest()
+    ).rstrip(b"=").decode()
+    state = secrets.token_hex(24)
+    params = urllib.parse.urlencode({
+        "response_type": "code",
+        "client_id": server["client_id"],
+        "code_challenge": challenge,
+        "code_challenge_method": "S256",
+        "redirect_uri": REDIRECT_URI,
+        "state": state,
+        "resource": server["url"],
+    })
+    record = {
+        "verifier": verifier,
+        "state": state,
+        "server_url": server["url"],
+        "client_id": server["client_id"],
+        "token_endpoint": meta["token_endpoint"],
+        "created": time.time(),
+    }
+    return f"{meta['authorization_endpoint']}?{params}", record
+
+
+def parse_callback(pasted, expected_state):
+    pasted = pasted.strip()
+    query = urllib.parse.urlsplit(pasted).query if "://" in pasted else pasted
+    q = urllib.parse.parse_qs(query)
+    if "error" in q:
+        desc = q.get("error_description", [""])[0]
+        sys.exit(f"error: authorization failed: {q['error'][0]} {desc}".rstrip())
+    if "code" not in q or "state" not in q:
+        sys.exit("error: pasted URL has no code/state — copy the FULL "
+                 "http://127.0.0.1:19876/... URL from the browser address bar")
+    if not secrets.compare_digest(q["state"][0], expected_state):
+        sys.exit("error: state mismatch — the pasted URL is from a different "
+                 "login attempt; re-run and use the newest URL")
+    return q["code"][0]
+
+
+def exchange(record, code):
+    data = urllib.parse.urlencode({
+        "grant_type": "authorization_code",
+        "code": code,
+        "redirect_uri": REDIRECT_URI,
+        "client_id": record["client_id"],
+        "code_verifier": record["verifier"],
+        "resource": record["server_url"],
+    }).encode()
+    return http_json(record["token_endpoint"], data=data)
+
+
+def store_token(name, server_url, token):
+    data_home = os.environ.get("XDG_DATA_HOME",
+                               os.path.expanduser("~/.local/share"))
+    path = os.path.join(data_home, "opencode", "mcp-auth.json")
+    store = {}
+    if os.path.exists(path):
+        try:
+            with open(path) as f:
+                store = json.load(f)
+        except (OSError, ValueError):
+            store = {}
+    entry = {"tokens": {"accessToken": token["access_token"]},
+             "serverUrl": server_url}
+    if "expires_in" in token:
+        entry["tokens"]["expiresAt"] = time.time() + float(token["expires_in"])
+    store[name] = entry
+    os.makedirs(os.path.dirname(path), mode=0o700, exist_ok=True)
+    with open(path, "w") as f:
+        json.dump(store, f, indent=2)
+    os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
+    return path, entry["tokens"].get("expiresAt")
+
+
+def finish(name, record, pasted):
+    code = parse_callback(pasted, record["state"])
+    token = exchange(record, code)
+    path, expires_at = store_token(name, record["server_url"], token)
+    try:
+        os.unlink(pending_file(name))
+    except OSError:
+        pass
+    print(f"Token for '{name}' written to {path}")
+    if expires_at:
+        remaining = int((expires_at - time.time()) / 60)
+        print(f"Expires in ~{remaining} min "
+              f"({time.strftime('%H:%M', time.localtime(expires_at))}); "
+              f"re-run this helper when it does.")
+
+
+def main():
+    ap = argparse.ArgumentParser(
+        description="Log in to a rucio-mcp server without a local browser.")
+    ap.add_argument("server", nargs="?", help="MCP server name, e.g. rucio-fcc")
+    ap.add_argument("--list", action="store_true",
+                    help="list OAuth-enabled MCP servers from the lumi config")
+    ap.add_argument("--start", action="store_true",
+                    help="print the login URL and exit")
+    ap.add_argument("--finish", metavar="CALLBACK_URL",
+                    help="complete a --start'ed login with the pasted URL")
+    args = ap.parse_args()
+
+    servers = load_servers()
+    if args.list or not args.server:
+        print("OAuth-enabled MCP servers:")
+        for n, s in servers.items():
+            print(f"  {n:14s} {s['url']}")
+        if not args.server:
+            ap.exit(0 if args.list else 2,
+                    None if args.list else "error: no server given\n")
+        return
+
+    if args.server not in servers:
+        sys.exit(f"error: '{args.server}' not in the lumi config "
+                 f"(known: {', '.join(servers) or 'none'})")
+    server = servers[args.server]
+
+    if args.finish:
+        path = pending_file(args.server)
+        try:
+            with open(path) as f:
+                record = json.load(f)
+        except OSError:
+            sys.exit(f"error: no pending login for '{args.server}' — "
+                     f"run with --start first")
+        if time.time() - record["created"] > 600:
+            os.unlink(path)
+            sys.exit("error: pending login is older than 10 min; start over")
+        finish(args.server, record, args.finish)
+        return
+
+    url, record = build_authorize(args.server, server)
+    print("Open this URL in a browser on ANY device (e.g. your laptop):\n")
+    print(f"  {url}\n")
+    print("After logging in, the browser will fail to load a page at")
+    print("http://127.0.0.1:19876/... — that is expected. Copy that full")
+    print("URL from the browser address bar.\n")
+
+    if args.start:
+        save_pending(args.server, record)
+        print(f"Then run:  lumi-rucio-auth {args.server} --finish '<that URL>'")
+        return
+
+    try:
+        pasted = input("Paste the URL here: ")
+    except (EOFError, KeyboardInterrupt):
+        sys.exit("\naborted")
+    finish(args.server, record, pasted)
+
+
+if __name__ == "__main__":
+    main()

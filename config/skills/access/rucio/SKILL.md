@@ -20,9 +20,20 @@ Pick the MCP server matching the user's VO: `rucio-atlas` for ATLAS,
 `rucio-cms` for CMS, `rucio-escape` for the ESCAPE datalake,
 `rucio-fcc` for FCC. On first use the user is sent through a browser
 SSO login; the resulting token is their own Rucio identity
-(`rucio-atlas_rucio_whoami` confirms the mapped account). If the OAuth
-login cannot complete (e.g. SSH session with no browser), fall back to
-the CLI path below.
+(`rucio-atlas_rucio_whoami` confirms the mapped account).
+
+**No local browser (lxplus / SSH session)?** The default OAuth flow
+dead-ends: it redirects the browser to `http://127.0.0.1:19876/...`,
+which only works when browser and opencode share a machine. Use the
+shipped helper instead — run `lumi-rucio-auth <server>` (on PATH after
+`source setup.sh`), open the printed URL in a browser on any device,
+log in, then paste back the full `http://127.0.0.1:19876/...` URL the
+browser fails to load. The helper exchanges the code locally and the
+MCP tools work immediately. Tokens are Rucio session tokens (~1 h);
+re-run the helper when one expires. You can drive this for the user:
+`lumi-rucio-auth <server> --start` prints the URL, then
+`lumi-rucio-auth <server> --finish '<pasted URL>'` completes it. If
+even that is not possible, fall back to the CLI path below.
 
 **Naming firewall**: MCP tool names (`rucio_list_dids`,
 `rucio_get_metadata`) deliberately mirror Rucio's *deprecated* flat-verb
