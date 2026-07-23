@@ -86,6 +86,8 @@ should_match:
       - "List the replication rules on a CMS dataset through the Rucio MCP server."
       # browserless-auth prompt: lumi-rucio-auth helper for SSH-only hosts:
       - "I'm on lxplus over SSH and the Rucio MCP login dead-ends on an unreachable 127.0.0.1 page — how do I authenticate without a local browser?"
+      # cric cliff guard: what DATA physically sits on an RSE is rucio; the RSE's config (protocols/token/tier) is cric:
+      - "List the file replicas physically stored on the BNL-ATLAS_DATADISK RSE."
 
   - skill: reana
     prompts:
@@ -138,6 +140,16 @@ should_match:
       - "What do the FTS3 docs say about OAuth2 token support and configuration?"
       - "Find the FTS3 third-party-copy / S3 / multihop docs at fts3-docs.web.cern.ch."
       - "What do the official CERN batch documentation pages say about HTCondor authentication?"
+
+  - skill: cric
+    prompts:
+      - "List the ATLAS Tier-1 sites and their clouds from CRIC."
+      - "What are the DDM storage endpoints at BNL-ATLAS, and which ones are tape?"
+      - "Show the PanDA queues for CERN-PROD and whether they're online."
+      - "What space token and access protocols does the AGLT2 LOCALGROUPDISK storage endpoint use?"
+      - "Which ATLAS grid sites have a LOCALGROUPDISK endpoint, per the computing-resource catalog?"
+      # The ddmendpoint-vs-Rucio boundary is guarded under `rucio` below:
+      # the endpoint's CONFIG (protocols/token/tier) is cric; the DATA on it is rucio.
 
   - skill: fts-rest
     prompts:

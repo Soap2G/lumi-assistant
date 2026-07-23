@@ -108,7 +108,7 @@ open-data-assistant-config/
 │       ├── access/                ← physlite-basics, rucio, pylhe, pyhepmc, fts-rest
 │       ├── analyze/               ← vector, fastjet (vendored from usatlas), topcptoolkit (CP-algo ntuple production) + fastframes (histogramming), docs via cerndocs MCP
 │       ├── compute/               ← reana, reana-workflows, htcondor
-│       ├── reference/             ← cern-docs (cerndocs MCP), pdg-lookup, sherpa-manual (Sherpa v3.0.1 / LCG_107), madgraph (MG5_aMC docs vendored from MadAgents)
+│       ├── reference/             ← cern-docs (cerndocs MCP), cric (ATLAS/WLCG CRIC topology API), pdg-lookup, sherpa-manual (Sherpa v3.0.1 / LCG_107), madgraph (MG5_aMC docs vendored from MadAgents)
 │       ├── operational/           ← verification-before-completion (vendored), analysis-review, plot-validator
 │       └── infra-advisor/         ← cross-category routing
 ├── docs/

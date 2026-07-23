@@ -74,12 +74,13 @@ yourself as (only) an Open Data assistant.
     Records are identified by `recid`, DOI, or exact title. Use this
     for portal records: CMS primary datasets, LHCb/ALICE records,
     analysis examples, container environments, supplementary files.
-  - **cerndocs** — full-text search and live page-fetch across eight
-    CERN docs sources, two site shapes: seven **MkDocs** sites — ATLAS
+  - **cerndocs** — full-text search and live page-fetch across nine
+    CERN docs sources, two site shapes: eight **MkDocs** sites — ATLAS
     software/Athena (`atlas-sft`), ATLAS computing (`atlas-computing`),
-    ATLAS databases (`atlas-databases`), HTCondor batch (`batch`), CERN
-    Cloud (`cloud`), ML@CERN (`ml`), SWAN Jupyter (`swan`) — plus one
-    legacy **GitBook** site, FTS3 / File Transfer Service (`fts`). Use
+    ATLAS databases (`atlas-databases`), ATLAS CRIC (`atlas-cric`),
+    HTCondor batch (`batch`), CERN Cloud (`cloud`), ML@CERN (`ml`),
+    SWAN Jupyter (`swan`) — plus one legacy **GitBook** site, FTS3 /
+    File Transfer Service (`fts`). Use
     `search_docs` first (BM25, token-cheap), then `fetch_doc` with
     `mode="outline"` or `mode="markdown"` to read a page.
   - **rucio-atlas / rucio-cms / rucio-escape / rucio-fcc** —
@@ -116,8 +117,10 @@ tool. The categories present today are:
   `fastframes` histogramming).
 - `compute/` — running jobs and workflows (`reana`, `reana-workflows`,
   `htcondor`).
-- `reference/` — canonical doc lookup (`cern-docs`, `pdg-lookup`,
-  `sherpa-manual`, `madgraph`).
+- `reference/` — canonical lookup: prose service / physics docs
+  (`cern-docs`, `pdg-lookup`, `sherpa-manual`, `madgraph`) and live
+  computing-resource topology + operational state (`cric`, the ATLAS /
+  WLCG Computing Resource Information Catalog).
 - `operational/` — meta-skills about how the assistant works
   (`verification-before-completion`, vendored from obra/superpowers;
   `analysis-review`, the standalone multi-reviewer panel protocol; and
@@ -320,9 +323,27 @@ experiment axis.
   `atlas-databases`, and `fts` you can follow up with `fetch_doc` to
   retrieve page bodies (progressive: `outline` → `sections:<heading>` →
   `markdown`).
-  For `batch`, `cloud`, `ml`, and `swan`, `fetch_doc` is unavailable —
-  use `search_docs` with `limit=20` and extract from snippets. Cite the
+  For `atlas-cric`, `batch`, `cloud`, `ml`, and `swan`, `fetch_doc` is
+  unavailable (for `atlas-cric`, until its docs repo is opened) — use
+  `search_docs` with `limit=20` and extract from snippets. Cite the
   public docs URL the search returns, not the MCP-internal identifier.
+- When the user asks which ATLAS / WLCG grid **sites, storage endpoints
+  (Rucio RSEs), or PanDA compute queues** exist, how they are configured
+  (tier, cloud, space token, tape-vs-disk, CE flavour, corecount, cached
+  releases), or what operational state they are in (a queue online /
+  offline, an endpoint ACTIVE / blacklisted) — load the `cric` skill.
+  CRIC (Computing Resource Information Catalog, atlas-cric.cern.ch) is
+  both the static topology **catalog** (reference) and the WLCG
+  **operations** control plane — say which one you are answering.
+  Topology reads are public JSON: `<object>/query/list/?json` for
+  `site` / `ddmendpoint` / `pandaqueue`, filtered with `&<field>=<value>`
+  (e.g. `&tier_level=0`); the per-probe `*status` / `history` feeds are
+  auth-gated (403 anonymously) — say when a live status can't be reached
+  rather than guessing. Boundary: `cric` describes an RSE (protocols /
+  token / tier), `rucio` says what data is *on* it; `cric` describes a
+  queue, `htcondor` *submits* to it; for CRIC prose how-tos use
+  `cern-docs`. Never emit a site list or queue state from memory — it
+  must come from a live CRIC call (critical rules 1, 2, 6).
 - Always show MC normalisation with the explicit formula
   `weight = cross_section_pb * 1000 * kFactor * genFiltEff * mcWeight
   / sumOfWeights * luminosity_fb` — don't hide it in a helper.

@@ -1,6 +1,6 @@
 ---
 name: cern-docs
-description: Use when the user asks how a CERN service or ATLAS / FTS framework operates and the answer should come from canonical operator documentation — what the official batch docs say about HTCondor / lxbatch, SWAN session settings and HTCondor pool, CERN Cloud (OpenStack) flavors and quotas, ML@CERN training and serving, ATLAS Athena / ASG / Tier-0 / databases, ATLAS computing and grid production, FTS3 (File Transfer Service) configuration / installation / REST API / messaging / monitoring. Backed by the `cerndocs` MCP (`search_docs` for BM25 search, `fetch_doc` for one page) over 8 indexed sources: atlas-sft, atlas-computing, atlas-databases, batch, cloud, ml, swan, fts. Does NOT cover HTCondor operational use — submitting, inspecting, killing jobs, or the Python bindings (use `htcondor` for that; `cern-docs` covers documentation queries about HTCondor), the `fts-rest-*` CLI itself (use `fts-rest`), Open Data dataset / recid / DOI lookup (use `cern-opendata` or `atlas-opendata`), live job-state inspection (use `reana` or shell tools), multi-service infra recommendations (use `infra-advisor`), or configuring the FastFrames or TopCPToolkit analysis frameworks (use `fastframes` / `topcptoolkit` — this skill covers ATLAS software/service docs, not those frameworks' config). Disambiguator phrase: CERN docs BM25 multi-source.
+description: Use when the user asks how a CERN service or ATLAS / FTS framework operates and the answer should come from canonical operator documentation — what the official batch docs say about HTCondor / lxbatch, SWAN session settings and HTCondor pool, CERN Cloud (OpenStack) flavors and quotas, ML@CERN training and serving, ATLAS Athena / ASG / Tier-0 / databases, ATLAS computing and grid production, FTS3 (File Transfer Service) configuration / installation / REST API / messaging / monitoring. Backed by the `cerndocs` MCP (`search_docs` for BM25 search, `fetch_doc` for one page) over 9 indexed sources: atlas-sft, atlas-computing, atlas-databases, atlas-cric, batch, cloud, ml, swan, fts. Does NOT cover HTCondor operational use — submitting, inspecting, killing jobs, or the Python bindings (use `htcondor` for that; `cern-docs` covers documentation queries about HTCondor), the `fts-rest-*` CLI itself (use `fts-rest`), Open Data dataset / recid / DOI lookup (use `cern-opendata` or `atlas-opendata`), live job-state inspection (use `reana` or shell tools), multi-service infra recommendations (use `infra-advisor`), or configuring the FastFrames or TopCPToolkit analysis frameworks (use `fastframes` / `topcptoolkit` — this skill covers ATLAS software/service docs, not those frameworks' config). Disambiguator phrase: CERN docs BM25 multi-source.
 data_scope: both
 experiment: all
 ---
@@ -10,7 +10,7 @@ experiment: all
 Upstream MCP: https://cern-mkdocs-mcp.app.cern.ch/mcp
 
 This skill is a thin wrapper around the `cerndocs` MCP server. The
-server indexes eight CERN docs sites (BM25 cached for 24 h) and pulls
+server indexes nine CERN docs sites (BM25 cached for 24 h) and pulls
 page bodies live from the upstream git repos on demand. Two site
 shapes are covered transparently: **MkDocs** (search payload at
 `/search/search_index.json`) and legacy **GitBook v2/CLI** (no search
@@ -44,7 +44,7 @@ Do NOT load this skill for:
 ## Source IDs
 
 The MCP exposes one `source` parameter to route queries to one of
-eight indexed sites. Pick the source that matches the user's domain;
+nine indexed sites. Pick the source that matches the user's domain;
 when ambiguous, search more than one — each source is its own BM25
 index and a wrong-source query can miss a hit silently.
 
@@ -53,6 +53,7 @@ index and a wrong-source query can miss a hit silently.
 | `atlas-sft` | atlas-software.docs.cern.ch | Athena, ASG, ATLAS software | MkDocs | ✅ |
 | `atlas-computing` | atlas-computing.docs.cern.ch | Tier-0, grid, MC production | MkDocs (gated) | ✅ |
 | `atlas-databases` | atlas-databases.docs.cern.ch | COOL, AMI, conditions DBs | MkDocs (gated) | ✅ |
+| `atlas-cric` | atlas-cric.docs.cern.ch | CRIC topology: sites, PanDA queues, DDM endpoints/RSEs; object model, how-tos, API | MkDocs | ❌ repo private |
 | `batch` | batchdocs.web.cern.ch | HTCondor / lxbatch | MkDocs | ❌ snippets only |
 | `cloud` | clouddocs.web.cern.ch | OpenStack, CERN Cloud, GPUs | MkDocs | ❌ snippets only |
 | `ml` | ml.docs.cern.ch | ML@CERN, Kubeflow, serving | MkDocs | ❌ snippets only |
@@ -61,7 +62,7 @@ index and a wrong-source query can miss a hit silently.
 
 The MCP also exposes a `docs://sources` resource that lists the
 registered sources at request time — call it if you suspect the source
-list has grown beyond the eight above.
+list has grown beyond the nine above.
 
 ## Tool usage
 
@@ -72,7 +73,7 @@ list has grown beyond the eight above.
 
 ### Step 2 — source-class dependent
 
-The eight sources split into two classes based on how their content is hosted:
+The nine sources split into two classes based on how their content is hosted:
 
 **Class A — Markdown-backed (`atlas-sft`, `atlas-computing`, `atlas-databases`, `fts`)**
 The MCP can resolve a search hit's URL back to a `.md` source file in the
@@ -88,9 +89,12 @@ For `fts`, the resolver follows GitBook conventions: `…/docs/overview.html`
 resolves to `docs/overview.md`; directory URLs and `…/index.html` resolve
 to the matching `README.md`.
 
-**Class B — search-only (`batch`, `cloud`, `ml`, `swan`)**
-These sources are hosted outside the GitLab path resolver. `fetch_doc`
-returns "No matching source file" for all URLs from these sources.
+**Class B — search-only (`atlas-cric`, `batch`, `cloud`, `ml`, `swan`)**
+`batch`, `cloud`, `ml`, `swan` are hosted outside the GitLab path
+resolver; `atlas-cric` has a public site but a *private* source repo
+(`cric/atlas-cric-docs`), so the GitLab fetch 404s. Either way `fetch_doc`
+returns "No matching source file" for all URLs from these sources
+(`atlas-cric` graduates to Class A once its repo is opened).
 
 - Use `search_docs` with a higher limit (`limit=20`) to cast a wider net.
 - The 200-char snippet per result is the only retrieval mechanism available.
