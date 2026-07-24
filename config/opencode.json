@@ -45,84 +45,156 @@
         "baseURL": "https://llmgw-litellm.web.cern.ch/v1"
       },
       "models": {
-        "gpt-4.1": {
-          "name": "GPT-4.1 (flagship)",
+        "gpt-5.6-sol": {
+          "name": "GPT-5.6 Sol (newest flagship)",
           "tool_call": true,
           "temperature": true,
           "reasoning": true,
           "attachment": true,
+          "release_date": "2026-07-01",
+          "limit": { "context": 1050000, "output": 128000 }
+        },
+        "gpt-5.6-terra": {
+          "name": "GPT-5.6 Terra",
+          "tool_call": true,
+          "temperature": true,
+          "reasoning": true,
+          "attachment": true,
+          "release_date": "2026-07-01",
+          "limit": { "context": 1050000, "output": 128000 }
+        },
+        "gpt-5.6-luna": {
+          "name": "GPT-5.6 Luna",
+          "tool_call": true,
+          "temperature": true,
+          "reasoning": true,
+          "attachment": true,
+          "release_date": "2026-07-01",
+          "limit": { "context": 1050000, "output": 128000 }
+        },
+        "gpt-5.5": {
+          "name": "GPT-5.5 (stable flagship)",
+          "tool_call": true,
+          "temperature": true,
+          "reasoning": true,
+          "attachment": true,
+          "release_date": "2026-05-01",
+          "limit": { "context": 1050000, "output": 128000 }
+        },
+        "gpt-5.4": {
+          "name": "GPT-5.4",
+          "tool_call": true,
+          "temperature": true,
+          "reasoning": true,
+          "attachment": true,
+          "release_date": "2026-04-01",
+          "limit": { "context": 1050000, "output": 128000 }
+        },
+        "gpt-5.3-chat-latest": {
+          "name": "GPT-5.3 Chat (latest)",
+          "tool_call": true,
+          "temperature": true,
+          "reasoning": true,
+          "attachment": true,
+          "release_date": "2026-03-01",
+          "limit": { "context": 128000, "output": 16384 }
+        },
+        "gpt-5.2": {
+          "name": "GPT-5.2",
+          "tool_call": true,
+          "temperature": true,
+          "reasoning": true,
+          "attachment": true,
+          "release_date": "2026-02-01",
+          "limit": { "context": 272000, "output": 128000 }
+        },
+        "gpt-5": {
+          "name": "GPT-5",
+          "tool_call": true,
+          "temperature": true,
+          "reasoning": true,
+          "attachment": true,
+          "release_date": "2025-12-01",
+          "limit": { "context": 272000, "output": 128000 }
+        },
+        "gpt-4.1": {
+          "name": "GPT-4.1 (legacy flagship)",
+          "tool_call": true,
+          "temperature": true,
+          "reasoning": false,
+          "attachment": true,
           "release_date": "2025-06-01",
-          "limit": { "context": 128000, "output": 8192 }
+          "limit": { "context": 1047576, "output": 32768 }
         },
-        "mistral-large-latest": {
-          "name": "Mistral Large 2 (flagship)",
+        "gpt-4.1-nano": {
+          "name": "GPT-4.1 Nano (fast/cheap)",
           "tool_call": true,
           "temperature": true,
           "reasoning": false,
-          "attachment": false,
-          "release_date": "2024-11-01",
-          "limit": { "context": 128000, "output": 8192 }
+          "attachment": true,
+          "release_date": "2025-06-01",
+          "limit": { "context": 1047576, "output": 32768 }
         },
-        "mistral-medium-latest": {
-          "name": "Mistral Medium 3 (balanced)",
-          "tool_call": true,
-          "temperature": true,
-          "reasoning": false,
-          "attachment": false,
-          "release_date": "2025-05-01",
-          "limit": { "context": 128000, "output": 8192 }
-        },
-        "mistral-small-latest": {
-          "name": "Mistral Small (fast/cheap)",
-          "tool_call": true,
-          "temperature": true,
-          "reasoning": false,
-          "attachment": false,
-          "release_date": "2025-03-01",
-          "limit": { "context": 32768, "output": 8192 }
-        },
-        "codestral-latest": {
-          "name": "Codestral (code generation)",
-          "tool_call": true,
-          "temperature": true,
-          "reasoning": false,
-          "attachment": false,
-          "release_date": "2024-05-01",
-          "limit": { "context": 32768, "output": 8192 }
-        },
-        "devstral-small-latest": {
-          "name": "Devstral Small (Mistral coding)",
-          "tool_call": true,
-          "temperature": true,
-          "reasoning": false,
-          "attachment": false,
-          "release_date": "2025-05-01",
-          "limit": { "context": 131072, "output": 8192 }
-        },
-        "qwen/qwen3-32b": {
-          "name": "Qwen 3 32B",
+        "openai/gpt-oss-120b": {
+          "name": "GPT-OSS 120B (open weights)",
           "tool_call": true,
           "temperature": true,
           "reasoning": true,
           "attachment": false,
-          "release_date": "2025-06-01",
-          "limit": { "context": 32768, "output": 8192 }
+          "release_date": "2025-08-01",
+          "limit": { "context": 131072, "output": 32766 }
         },
-        "llama-3.1-8b-instruct": {
-          "name": "Llama 3.1 8B (fast/lightweight)",
+        "llama-3.3-70b-versatile": {
+          "name": "Llama 3.3 70B (versatile)",
+          "tool_call": true,
+          "temperature": true,
+          "reasoning": false,
+          "attachment": false,
+          "release_date": "2024-12-01",
+          "limit": { "context": 128000, "output": 32768 }
+        },
+        "llama-3.1-8b-instant": {
+          "name": "Llama 3.1 8B Instant (fast/lightweight)",
           "tool_call": true,
           "temperature": true,
           "reasoning": false,
           "attachment": false,
           "release_date": "2024-07-01",
-          "limit": { "context": 8192, "output": 2048 }
+          "limit": { "context": 128000, "output": 8192 }
+        },
+        "qwen/qwen3.6-27b": {
+          "name": "Qwen 3.6 27B",
+          "tool_call": true,
+          "temperature": true,
+          "reasoning": true,
+          "attachment": false,
+          "release_date": "2026-01-01",
+          "limit": { "context": 32768, "output": 8192 }
+        },
+        "gpt-oss-20b": {
+          "name": "GPT-OSS 20B (CERN self-hosted)",
+          "tool_call": true,
+          "temperature": true,
+          "reasoning": true,
+          "attachment": false,
+          "release_date": "2025-08-01",
+          "limit": { "context": 131072, "output": 32768 }
+        },
+        "hf-qwen3-32b-awq": {
+          "name": "Qwen 3 32B AWQ (CERN self-hosted, chat only — tool-calling broken server-side)",
+          "tool_call": false,
+          "temperature": true,
+          "reasoning": true,
+          "attachment": false,
+          "release_date": "2025-06-01",
+          "limit": { "context": 32768, "output": 8192 }
         }
       }
     }
   },
 
-  "model": "litellm/gpt-4.1",
-  "small_model": "litellm/mistral-small-latest",
+  "model": "litellm/gpt-5.5",
+  "small_model": "litellm/gpt-4.1-nano",
 
   "mcp": {
     "atlasopenmagic": {
@@ -195,6 +267,9 @@
       "jupyter *": "ask",
       "pip *": "ask",
       "uv *": "ask",
+      "jq *": "allow",
+      "curl -s https://atlas-cric.cern.ch/*": "allow",
+      "curl*https://atlas-cric.cern.ch/*": "allow",
       "curl *": "ask",
       "xrdcp *": "ask",
       "rucio whoami": "allow",

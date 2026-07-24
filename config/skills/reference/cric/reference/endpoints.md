@@ -162,3 +162,7 @@ without saying which one it is.
 - Responses are objects keyed by entity name — `.items()`, not `[i]`.
 - Always filter before fetching; unfiltered `query/list` is hundreds of
   entries.
+- **Project, don't dump.** The full `?json` is ~14k lines (full object per
+  entry). Pipe to `jq -r 'to_entries[] | [.key, .value.<f1>, .value.<f2>]
+  | @tsv'` to get a few short columns, then filter client-side — never
+  fetch the whole blob into context and grep it.

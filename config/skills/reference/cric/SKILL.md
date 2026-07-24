@@ -102,6 +102,44 @@ filter the boolean client-side. If you need only a couple
 of fields, still fetch filtered and pick the keys client-side (the API
 returns the full object per entry).
 
+### Project fields — never dump the whole list into context
+
+Each object carries its full nested config, so an unfiltered
+`site/query/list/?json` is **~14,000 lines**. Do NOT fetch that whole
+blob into context and `grep` it: `grep` can't tie a nested value back to
+its site (the top-level key and the nested `rcsite.name` often differ,
+e.g. `ARC-TEST` → `NDGF-T1`), and tool output truncates.
+
+**Project** to the fields you need with `curl … | jq` (both are
+permission-allowlisted for the CRIC host — no prompt):
+
+```bash
+# One short line per site — name, country, tier, state (~600 lines, not 14k):
+curl -s 'https://atlas-cric.cern.ch/api/atlas/site/query/list/?json' \
+  | jq -r 'to_entries[] | [.key, .value.country_code, .value.tier_level, .value.state] | @tsv'
+```
+
+then filter client-side. Same shape for `ddmendpoint`
+(`.value.token, .value.type, .value.is_tape`) and `pandaqueue`
+(`.value.status, .value.resource_type, .value.corecount`). Prefer this
+over the `webfetch` tool — it returns the whole body and cannot project
+(and only accepts `text|markdown|html`, so a `?json` URL must be fetched
+as `text`). No `jq` available? Hand the saved JSON to a subagent to
+parse; never grep it inline.
+
+### Geography and other non-field filters
+
+There is **no continent field and no free-text search** — a server-side
+filter is exact-match on one string/int field. Geographic questions
+("sites in Europe") are answered client-side by projecting `country_code`
+(ISO-2) and filtering. Sanity-check the result, don't assert a hard count:
+
+- `country_code` is sysadmin-declared; some entries are cloud / volunteer
+  / test with off-geography codes (`BOINC`, `GOOGLE`, `*_TEST`, and US
+  institutes such as `KIPAC` / `NOSAMS`).
+- RU / TR / AM / GE straddle Europe/Asia — state the cut you used and flag
+  the ambiguous entries rather than presenting a single definitive number.
+
 The exhaustive per-object field catalogue (what each key means, the
 useful filters, and copy-paste examples) is in
 [reference/endpoints.md](reference/endpoints.md) — read it before
@@ -162,3 +200,9 @@ A successful use ends with either a concrete topology answer grounded
 in a shown CRIC query (site/endpoint/queue named, with the field that
 answered the question), or an explicit statement that the needed feed
 is auth-gated and was not reachable anonymously.
+
+If the query implies **all** of something ("all sites in X", "every tape
+endpoint"), the answer must be the **complete** set — a capped grep (100
+matches), a truncated tool slice, or a "first ~30" list is a truncation,
+not the answer. Project with `jq` and **count** before claiming
+completeness.
