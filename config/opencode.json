@@ -190,11 +190,40 @@
           "limit": { "context": 32768, "output": 8192 }
         }
       }
+    },
+
+    "aigw": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "CERN AI Gateway (aigw.cern.ch)",
+      "env": ["LITELLM_API_KEY"],
+      "options": {
+        "baseURL": "https://aigw.cern.ch/v1"
+      },
+      "models": {
+        "hf-qwen3-32b-awq": {
+          "name": "Qwen 3 32B AWQ (aigw, CERN self-hosted)",
+          "tool_call": true,
+          "temperature": true,
+          "reasoning": true,
+          "attachment": false,
+          "release_date": "2025-06-01",
+          "limit": { "context": 32768, "output": 8192 }
+        },
+        "gpt-oss-20b": {
+          "name": "GPT-OSS 20B (aigw, CERN self-hosted — fallback)",
+          "tool_call": true,
+          "temperature": true,
+          "reasoning": true,
+          "attachment": false,
+          "release_date": "2025-08-01",
+          "limit": { "context": 131072, "output": 32768 }
+        }
+      }
     }
   },
 
-  "model": "litellm/gpt-5.5",
-  "small_model": "litellm/gpt-4.1-nano",
+  "model": "aigw/hf-qwen3-32b-awq",
+  "small_model": "aigw/gpt-oss-20b",
 
   "mcp": {
     "atlasopenmagic": {
