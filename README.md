@@ -8,7 +8,9 @@ A pluggable [opencode](https://opencode.ai) configuration that turns
 opencode (or its CERN-flavoured sibling **Lumi**) into a **general
 CERN assistant** — open data, service operations (Rucio, FTS, REANA, EOS, SWAN, lxbatch, …), physics analysis, detector
 and MC reference, and anything else CERN-shaped that someone bothers
-to write a skill for.
+to write a skill for. The same skill/agent library can also be built
+into a [Claude Code](https://claude.com/claude-code) plugin — see
+[Using this as a Claude Code plugin](#using-this-as-a-claude-code-plugin).
 
 The repo root IS the CVMFS payload. After cloning or `rsync`ing to
 CVMFS, users source `bin/setup.sh` and the assistant becomes
@@ -46,6 +48,41 @@ Users on any lxplus / SWAN / workstation with the CVMFS mount then do:
 source /cvmfs/sw.escape.eu/etc/lumi/atom-assistant/latest/bin/setup.sh
 lumi    # or opencode
 ```
+
+## Using this as a Claude Code plugin
+
+`config/` is the single source of truth for both opencode/Lumi and
+[Claude Code](https://claude.com/claude-code) — Claude Code users don't
+edit anything under `config/` directly. `script/build_claude_plugin.py`
+reads `config/skills/`, `config/agents/`, `config/opencode.json`, and
+`config/AGENTS.md` and writes a Claude Code plugin into a gitignored
+`claude-plugin/` directory (same idea as `dist/` for the CVMFS path —
+a build output, not checked in, safe to regenerate any time `config/`
+changes):
+
+```bash
+python3 script/build_claude_plugin.py
+```
+
+Try it for one session:
+
+```bash
+claude --plugin-dir ./claude-plugin
+```
+
+Or install it permanently for yourself (auto-loads next session as
+`lumi@skills-dir`):
+
+```bash
+ln -s "$(pwd)/claude-plugin" ~/.claude/skills/lumi
+```
+
+See the generated `claude-plugin/README.md` for exactly what ports
+1:1 (the skills — minus their category subfolders, since Claude Code
+only discovers `skills/<name>/SKILL.md` one level deep) and what had
+to be adapted (the 6 subagents' opencode permission profiles, the MCP
+OAuth story, the `AGENTS.md` persona as a `/lumi` command). This path
+is personal-use only for now — no marketplace, no team distribution.
 
 ## How skills compose
 
@@ -88,7 +125,7 @@ categories the library is designed to grow into).
 ```
 open-data-assistant-config/
 ├── config/                        ← OPENCODE_CONFIG_DIR target
-│   ├── opencode.json              ← providers (anthropic/openai/litellm), MCPs, permissions
+│   ├── opencode.json              ← providers (anthropic/litellm/aigw), MCPs, permissions
 │   ├── AGENTS.md                  ← top-level persona + critical rules
 │   ├── agents/
 │   │   ├── tutor.md               ← didactic, read-only
@@ -97,6 +134,8 @@ open-data-assistant-config/
 │   │   ├── reviewer-critical.md   ← tool-grounded critical reviewer
 │   │   ├── reviewer-constructive.md ← constructive improver
 │   │   └── arbiter.md             ← PASS / ITERATE / ESCALATE verdict
+│   ├── cimd/
+│   │   └── opencode.json          ← CIMD client-metadata doc for the rucio-* MCP OAuth login
 │   ├── evals/
 │   │   ├── cases.yaml             ← prompt × expected-skill ground truth
 │   │   ├── run.py                 ← skill-router eval harness (needs API key)
@@ -112,13 +151,16 @@ open-data-assistant-config/
 │       ├── operational/           ← verification-before-completion (vendored), analysis-review, plot-validator
 │       └── infra-advisor/         ← cross-category routing
 ├── docs/
-│   └── skill-design.md            ← Skill Library Design Guide (vendor target)
+│   ├── skill-design.md            ← Skill Library Design Guide (vendor target)
+│   ├── llm-execution-guide.md     ← operational how-not-to-fail for LLM agents editing config/
+│   └── archive/                   ← superseded execution briefs, kept for history
 ├── bin/
 │   ├── setup.sh                   ← sourced by users (any prefix)
 │   └── lumi-rucio-auth            ← browserless OAuth login for rucio-* MCP
 ├── script/
 │   ├── cvmfs-deploy.sh            ← stage and optionally publish
 │   ├── sync_vendored.py           ← rebuild vendored skills from upstream
+│   ├── build_claude_plugin.py     ← generate claude-plugin/ (Claude Code plugin) from config/
 │   └── vendor/                    ← sources.yaml + per-skill frontmatter overrides
 ├── .github/workflows/checks.yml   ← lint on every PR + evals on main
 ├── VERSION                        ← semver string; drives the staged directory name
