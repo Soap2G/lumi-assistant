@@ -187,7 +187,7 @@
           "reasoning": true,
           "attachment": false,
           "release_date": "2025-06-01",
-          "limit": { "context": 32768, "output": 8192 }
+          "limit": { "context": 16384, "output": 2048 }
         }
       }
     },
@@ -207,7 +207,16 @@
           "reasoning": true,
           "attachment": false,
           "release_date": "2025-06-01",
-          "limit": { "context": 32768, "output": 8192 }
+          "limit": { "context": 16384, "output": 2048 }
+        },
+        "qwen3.8-27b-fp16": {
+          "name": "Qwen 3.8 27B FP16 (aigw, CERN self-hosted, vision)",
+          "tool_call": true,
+          "temperature": true,
+          "reasoning": true,
+          "attachment": true,
+          "release_date": "2025-06-01",
+          "limit": { "context": 65536, "output": 16384 }
         },
         "gpt-oss-20b": {
           "name": "GPT-OSS 20B (aigw, CERN self-hosted — fallback)",
@@ -222,7 +231,7 @@
     }
   },
 
-  "model": "aigw/hf-qwen3-32b-awq",
+  "model": "aigw/qwen3.8-27b-fp16",
   "small_model": "aigw/gpt-oss-20b",
 
   "mcp": {
