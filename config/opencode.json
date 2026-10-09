@@ -197,9 +197,19 @@
       "name": "CERN AI Gateway (aigw.cern.ch)",
       "env": ["LITELLM_API_KEY"],
       "options": {
-        "baseURL": "https://aigw.cern.ch/v1"
+        "baseURL": "https://aigw.cern.ch/v1",
+        "timeout": 600000
       },
       "models": {
+        "glm-5.3-flash-int4": {
+          "name": "GLM 5.3 Flash INT4 (aigw, CERN self-hosted, default)",
+          "tool_call": true,
+          "temperature": true,
+          "reasoning": true,
+          "attachment": false,
+          "release_date": "2026-09-01",
+          "limit": { "context": 1048576, "output": 16384 }
+        },
         "hf-qwen3-32b-awq": {
           "name": "Qwen 3 32B AWQ (aigw, CERN self-hosted)",
           "tool_call": true,
@@ -216,7 +226,7 @@
           "reasoning": true,
           "attachment": true,
           "release_date": "2025-06-01",
-          "limit": { "context": 65536, "output": 16384 }
+          "limit": { "context": 131072, "output": 16384 }
         },
         "gpt-oss-20b": {
           "name": "GPT-OSS 20B (aigw, CERN self-hosted — fallback)",
@@ -231,7 +241,7 @@
     }
   },
 
-  "model": "aigw/qwen3.8-27b-fp16",
+  "model": "aigw/glm-5.3-flash-int4",
   "small_model": "aigw/gpt-oss-20b",
 
   "mcp": {
