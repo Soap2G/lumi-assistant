@@ -183,6 +183,8 @@ def quote_description(skill_md: str) -> str:
             value = line[len("description:") :].strip()
             if not value or value[0] in "\"'>|&*![{%@`":
                 raise ValueError(f"description is not a plain one-line scalar: {line[:60]!r}")
+            if " #" in value or "\r" in head:
+                raise ValueError(f"description has a YAML comment or CR, which quoting would change: {line[:60]!r}")
             if i + 1 < len(lines) and lines[i + 1][:1] in " \t":
                 raise ValueError(f"description continues on the next line: {line[:60]!r}")
             lines[i] = "description: " + json.dumps(value, ensure_ascii=False)
@@ -242,8 +244,9 @@ def main():
         print(f"pi/ generation OK ({n_skills} skills)")
         return 0
 
-    # Build next to pi/ and swap, so a failure leaves the old pi/ intact.
-    tmp = Path(tempfile.mkdtemp(prefix=".pi-build-", dir=REPO_ROOT))
+    # Build in a temp dir (outside the repo, so a killed run leaves nothing for
+    # the deploy rsync) and swap, so a failure leaves the old pi/ intact.
+    tmp = Path(tempfile.mkdtemp(prefix="lumi-pi-build-"))
     try:
         n_skills = generate(tmp / "pi")
         if OUT.exists():
