@@ -8,8 +8,12 @@ and regenerates `pi/` from it, so it is safe to re-run any time
 Never hand-edit anything under `pi/` — it will be overwritten on the next
 run.
 
-Skills are not copied: `lumi-pi` passes `--skill <root>/config/skills`
-and Pi discovers skills recursively.
+Skills are copied to `pi/skills/` with one change: the `description`
+line is YAML-quoted. Lumi descriptions contain ": " (for example
+"Disambiguator phrase: ..."), which is invalid in an unquoted YAML scalar.
+Pi drops such skills silently; opencode accepts them. `lumi-pi` passes
+`--skill <root>/pi/skills`; Pi discovers skills recursively. Quoting the
+source files is a separate change.
 
 Run from anywhere:
 
@@ -19,6 +23,7 @@ Run from anywhere:
 
 import argparse
 import json
+import shutil
 import sys
 import tempfile
 from pathlib import Path
@@ -166,6 +171,31 @@ def long_descriptions():
     return found
 
 
+def quote_description(skill_md: str) -> str:
+    """Return SKILL.md text with the description line YAML-quoted. JSON
+    string syntax is valid YAML double-quoted syntax."""
+    head, sep, body = skill_md.partition("\n---\n")
+    lines = head.splitlines()
+    for i, line in enumerate(lines):
+        if line.startswith("description:"):
+            lines[i] = "description: " + json.dumps(line[len("description:") :].strip(), ensure_ascii=False)
+            break
+    else:
+        raise ValueError("SKILL.md has no description line")
+    return "\n".join(lines) + sep + body
+
+
+def build_skills(out: Path) -> int:
+    count = 0
+    for skill_md in sorted(SRC_SKILLS.rglob("SKILL.md")):
+        src = skill_md.parent
+        dest = out / "skills" / src.relative_to(SRC_SKILLS)
+        shutil.copytree(src, dest)
+        (dest / "SKILL.md").write_text(quote_description(skill_md.read_text()))
+        count += 1
+    return count
+
+
 def dump(obj) -> str:
     return json.dumps(obj, indent=2) + "\n"
 
@@ -187,6 +217,7 @@ def generate(out: Path):
     }
     for name, content in files.items():
         (out / name).write_text(content)
+    return build_skills(out)
 
 
 def tree(root: Path) -> dict:
@@ -212,12 +243,11 @@ def main():
         return 0
 
     if OUT.exists():
-        import shutil
-
         shutil.rmtree(OUT)
-    generate(OUT)
+    n_skills = generate(OUT)
     config = load_opencode()
     print(f"pi/ generated at {OUT}")
+    print(f"  skills:        {n_skills}")
     print(f"  default model: {config['model']}")
     print(f"  providers:     {', '.join(build_models(config)['providers'])}")
     print(f"  mcp servers:   {', '.join(PUBLIC_MCP)}")

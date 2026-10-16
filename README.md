@@ -89,9 +89,11 @@ is personal-use only for now — no marketplace, no team distribution.
 The same config can drive the [Pi coding agent](https://github.com/earendil-works/pi).
 `script/build_pi_package.py` reads `config/opencode.json` and
 `config/AGENTS.md` and writes `settings.json`, `models.json`, `mcp.json`
-and `AGENTS.md` into a gitignored `pi/` directory. `cvmfs-deploy.sh` runs
-it, so `pi/` ships next to `config/`. Skills are not copied: Pi reads
-`config/skills/` directly.
+and `AGENTS.md` into a gitignored `pi/` directory, plus a copy of the skills
+in `pi/skills/`. The copy differs only in that each `description` is
+YAML-quoted: Pi silently drops skills whose unquoted description contains
+`: `, and every Lumi description does. `cvmfs-deploy.sh` runs the
+generator, so `pi/` ships next to `config/`.
 
 On CVMFS, users start it with:
 
