@@ -84,6 +84,30 @@ to be adapted (the 6 subagents' opencode permission profiles, the MCP
 OAuth story, the `AGENTS.md` persona as a `/lumi` command). This path
 is personal-use only for now — no marketplace, no team distribution.
 
+## Pi (experimental)
+
+The same config can drive the [Pi coding agent](https://github.com/earendil-works/pi).
+`script/build_pi_package.py` reads `config/opencode.json` and
+`config/AGENTS.md` and writes `settings.json`, `models.json`, `mcp.json`
+and `AGENTS.md` into a gitignored `pi/` directory. `cvmfs-deploy.sh` runs
+it, so `pi/` ships next to `config/`. Skills are not copied: Pi reads
+`config/skills/` directly.
+
+On CVMFS, users start it with:
+
+```bash
+source /cvmfs/sw.escape.eu/lumi/latest/bin/setup.sh
+lumi --pi
+```
+
+Never edit `pi/` by hand. `python3 script/build_pi_package.py --check`
+fails when `pi/` is stale; CI runs it.
+
+Not yet on Pi: the Rucio MCP servers (they need OAuth), sub-agents, and
+permission prompts (Pi runs commands without asking). Skills with a
+description longer than 1024 characters give a warning when you run the
+generator.
+
 ## How skills compose
 
 Skills don't have to live in this repo. Three layers stack:
@@ -161,6 +185,7 @@ open-data-assistant-config/
 │   ├── cvmfs-deploy.sh            ← stage and optionally publish
 │   ├── sync_vendored.py           ← rebuild vendored skills from upstream
 │   ├── build_claude_plugin.py     ← generate claude-plugin/ (Claude Code plugin) from config/
+│   ├── build_pi_package.py        ← generate pi/ (Pi agent config) from config/
 │   └── vendor/                    ← sources.yaml + per-skill frontmatter overrides
 ├── .github/workflows/checks.yml   ← lint on every PR + evals on main
 ├── VERSION                        ← semver string; drives the staged directory name

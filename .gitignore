@@ -1,5 +1,6 @@
 dist/
 claude-plugin/
+pi/
 .DS_Store
 *.log
 .claude/
