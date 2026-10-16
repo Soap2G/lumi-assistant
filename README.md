@@ -102,8 +102,10 @@ source /cvmfs/sw.escape.eu/lumi/latest/bin/setup.sh
 lumi --pi
 ```
 
-Never edit `pi/` by hand. `python3 script/build_pi_package.py --check`
-fails when `pi/` is stale; CI runs it.
+Never edit `pi/` by hand: it is gitignored and regenerated on every deploy.
+`python3 script/build_pi_package.py --check` generates into a temp dir and
+fails if generation breaks (for example when `AGENTS.md` changes in a way
+the generator does not handle); CI runs it.
 
 Not yet on Pi: the Rucio MCP servers (they need OAuth), sub-agents, and
 permission prompts (Pi runs commands without asking). Skills with a
