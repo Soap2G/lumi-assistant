@@ -97,6 +97,8 @@ def build_settings(config) -> dict:
         "enableInstallTelemetry": False,
         "defaultProjectTrust": "never",
         "enableSkillCommands": True,
+        # Display only: the model still reasons. Ctrl+T shows it again.
+        "hideThinkingBlock": True,
     }
     # The schema of models.json has no provider timeout; Pi's equivalent is
     # a global setting. Carry the longest opencode provider timeout (aigw,
