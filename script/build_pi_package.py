@@ -173,12 +173,19 @@ def long_descriptions():
 
 def quote_description(skill_md: str) -> str:
     """Return SKILL.md text with the description line YAML-quoted. JSON
-    string syntax is valid YAML double-quoted syntax."""
+    string syntax is valid YAML double-quoted syntax. Only a plain one-line
+    description is handled: anything else raises, so a skill is never
+    silently garbled."""
     head, sep, body = skill_md.partition("\n---\n")
     lines = head.splitlines()
     for i, line in enumerate(lines):
         if line.startswith("description:"):
-            lines[i] = "description: " + json.dumps(line[len("description:") :].strip(), ensure_ascii=False)
+            value = line[len("description:") :].strip()
+            if not value or value[0] in "\"'>|&*![{%@`":
+                raise ValueError(f"description is not a plain one-line scalar: {line[:60]!r}")
+            if i + 1 < len(lines) and lines[i + 1][:1] in " \t":
+                raise ValueError(f"description continues on the next line: {line[:60]!r}")
+            lines[i] = "description: " + json.dumps(value, ensure_ascii=False)
             break
     else:
         raise ValueError("SKILL.md has no description line")
@@ -186,12 +193,11 @@ def quote_description(skill_md: str) -> str:
 
 
 def build_skills(out: Path) -> int:
+    dest = out / "skills"
+    shutil.copytree(SRC_SKILLS, dest)
     count = 0
-    for skill_md in sorted(SRC_SKILLS.rglob("SKILL.md")):
-        src = skill_md.parent
-        dest = out / "skills" / src.relative_to(SRC_SKILLS)
-        shutil.copytree(src, dest)
-        (dest / "SKILL.md").write_text(quote_description(skill_md.read_text()))
+    for skill_md in sorted(dest.rglob("SKILL.md")):
+        skill_md.write_text(quote_description(skill_md.read_text()))
         count += 1
     return count
 
@@ -236,9 +242,15 @@ def main():
         print(f"pi/ generation OK ({n_skills} skills)")
         return 0
 
-    if OUT.exists():
-        shutil.rmtree(OUT)
-    n_skills = generate(OUT)
+    # Build next to pi/ and swap, so a failure leaves the old pi/ intact.
+    tmp = Path(tempfile.mkdtemp(prefix=".pi-build-", dir=REPO_ROOT))
+    try:
+        n_skills = generate(tmp / "pi")
+        if OUT.exists():
+            shutil.rmtree(OUT)
+        shutil.move(str(tmp / "pi"), str(OUT))
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
     config = load_opencode()
     print(f"pi/ generated at {OUT}")
     print(f"  skills:        {n_skills}")
