@@ -18,6 +18,7 @@
 #     VERSION
 #     bin/setup.sh
 #     config/...       (OPENCODE_CONFIG_DIR target)
+#     pi/...           (generated Pi config, read by lumi-pi)
 #     README.md
 #   latest -> <VERSION>
 
@@ -66,6 +67,11 @@ VERSION="$(cat "${REPO_ROOT}/VERSION" | tr -d '[:space:]')"
 DEST="${STAGE_DIR}/${VERSION}"
 
 echo "==> Staging open-data-assistant v${VERSION}"
+
+# Regenerate the Pi config so pi/ is in the payload. set -e fails the
+# deploy if the generator fails.
+python3 "${REPO_ROOT}/script/build_pi_package.py"
+
 rm -rf "${DEST}"
 mkdir -p "${DEST}"
 
@@ -86,6 +92,7 @@ ln -sfn "${VERSION}" "${STAGE_DIR}/latest"
 
 echo "==> Staged at ${DEST}"
 echo "    ${DEST}/config/      (OPENCODE_CONFIG_DIR target)"
+echo "    ${DEST}/pi/          (Pi config, read by lumi-pi)"
 echo "    ${DEST}/bin/setup.sh (users source this)"
 echo "    ${STAGE_DIR}/latest  -> ${VERSION}"
 

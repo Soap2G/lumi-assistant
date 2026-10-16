@@ -21,3 +21,4 @@ jobs:
       - run: pip install pyyaml httpx
       - run: python config/evals/lint.py
       - run: python script/sync_vendored.py --check
+      - run: python script/build_pi_package.py --check

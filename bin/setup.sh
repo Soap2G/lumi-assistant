@@ -55,4 +55,26 @@ echo "open-data-assistant v${OPEN_DATA_ASSISTANT_VERSION} ready"
 echo "  OPENCODE_CONFIG_DIR=$OPENCODE_CONFIG_DIR"
 echo "  OPENCODE_DISABLE_PROJECT_CONFIG=$OPENCODE_DISABLE_PROJECT_CONFIG"
 
-unset _oda_src _oda_dir _oda_bin _oda_root _oda_config
+# Ensure opencode's data/log dir is writable.
+# opencode writes logs, sessions and cache under $XDG_DATA_HOME/opencode
+# (default ~/.local/share/opencode) — separate from OPENCODE_CONFIG_DIR above.
+# On some notebook/batch hosts (e.g. REANA) that path is missing or owned by
+# another UID, which makes opencode abort at startup with:
+#   PermissionDenied: FileSystem.open (.../opencode/log/opencode.log)
+# If the target isn't writable, relocate XDG_DATA_HOME to a per-user tmp dir.
+# This is a no-op when the default location already works.
+_oda_data_dir="${XDG_DATA_HOME:-$HOME/.local/share}/opencode/log"
+if ( mkdir -p "$_oda_data_dir" && touch "$_oda_data_dir/.oda-write-test" ) 2>/dev/null; then
+  rm -f "$_oda_data_dir/.oda-write-test" 2>/dev/null
+else
+  _oda_fallback="${TMPDIR:-/tmp}/opencode-data-$(id -u)"
+  if mkdir -p "$_oda_fallback/opencode/log" 2>/dev/null; then
+    export XDG_DATA_HOME="$_oda_fallback"
+    echo "  XDG_DATA_HOME=$XDG_DATA_HOME (relocated; default data dir not writable)"
+  else
+    echo "  WARNING: opencode data dir not writable and fallback failed;" >&2
+    echo "           opencode may crash on start (set XDG_DATA_HOME manually)" >&2
+  fi
+fi
+
+unset _oda_src _oda_dir _oda_bin _oda_root _oda_config _oda_data_dir _oda_fallback
